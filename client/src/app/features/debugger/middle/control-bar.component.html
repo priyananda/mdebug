@@ -1,0 +1,53 @@
+<div class="bar">
+  <div class="bar__buttons">
+    <button
+      type="button"
+      class="btn btn--go"
+      [disabled]="!debug.canStart()"
+      (click)="debug.start()"
+      title="Run from the beginning"
+    >
+      <span class="btn__glyph">&#9654;</span> start
+    </button>
+
+    <button
+      type="button"
+      class="btn"
+      [disabled]="!debug.canContinue()"
+      (click)="debug.continue_()"
+      title="Run to the next breakpoint"
+    >
+      <span class="btn__glyph">&#8677;</span> continue
+    </button>
+
+    <button
+      type="button"
+      class="btn"
+      [disabled]="!debug.canStep()"
+      (click)="step($event)"
+      title="Advance one stage (shift-click for ten)"
+    >
+      <span class="btn__glyph">&#8628;</span> step
+    </button>
+
+    <button
+      type="button"
+      class="btn btn--stop"
+      [disabled]="!debug.canStop()"
+      (click)="debug.stop()"
+      title="Abort the run; captured state stays inspectable"
+    >
+      <span class="btn__glyph">&#9632;</span> stop
+    </button>
+  </div>
+
+  <div class="bar__status" aria-live="polite">
+    <span class="pill" [attr.data-status]="debug.status()">{{ statusLabel() }}</span>
+    <span class="bar__pos">
+      step {{ debug.currentStep() }}/{{ maxSteps() }}
+      <span class="bar__sep">&middot;</span>
+      <span class="bar__stage">{{ position() }}</span>
+    </span>
+    <span class="bar__len">T={{ debug.sequenceLength() }}</span>
+  </div>
+</div>

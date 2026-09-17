@@ -1,0 +1,262 @@
+:host {
+  display: block;
+  min-height: 0;
+  /* Grid items default to min-width:auto, which would let the SVG's intrinsic
+     300-unit width force the whole column to overflow. */
+  min-width: 0;
+}
+
+.graph {
+  min-width: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  height: 100%;
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.graph__head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--s-2);
+  padding: var(--s-2) var(--s-3);
+  border-bottom: 1px solid var(--line);
+}
+
+.graph__title {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.graph__hint {
+  flex: 1;
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+}
+
+.graph__compact {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.graph__compact:hover, .graph__compact.is-on { color: var(--ink); }
+
+.graph__scroll {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-1) 0;
+}
+
+/* width:100% with height:auto makes the browser derive the height from the
+   viewBox aspect ratio, so the graph scales down cleanly in a narrow column. */
+.graph__svg {
+  display: block;
+  width: 100%;
+  height: auto;
+}
+
+/* --- structure ----------------------------------------------------------- */
+
+.spine {
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.pc-band {
+  fill: var(--accent-bg);
+  opacity: 0.45;
+}
+
+.pc-band.is-halted {
+  opacity: 0.9;
+}
+
+.pc-caret {
+  fill: var(--accent-line);
+}
+
+.row-label {
+  font-family: var(--font-mono);
+  font-size: 7.5px;
+  fill: var(--ink-faint);
+}
+
+/* --- gutter -------------------------------------------------------------- */
+
+.gutter {
+  fill: transparent;
+  cursor: pointer;
+}
+
+.gutter:hover {
+  fill: var(--bg-hover);
+}
+
+/* A hollow ring on hover over an empty slot: the IDE affordance this audience
+   already knows, without committing a mark until they click. */
+.gutter:hover + .bp,
+.gutter:hover {
+  stroke: none;
+}
+
+.bp {
+  fill: var(--danger);
+  pointer-events: none;
+}
+
+.bp.is-disabled {
+  fill: none;
+  stroke: var(--danger);
+  stroke-width: 1.5;
+}
+
+.bp.is-conditional {
+  fill: var(--bg);
+  stroke: var(--danger);
+  stroke-width: 2.5;
+  stroke-dasharray: 2.2 1.6;
+}
+
+/* --- nodes --------------------------------------------------------------- */
+
+.node {
+  cursor: pointer;
+}
+
+.node__box {
+  fill: var(--bg);
+  stroke: var(--line-strong);
+  stroke-width: 1;
+}
+
+.node.is-layer .node__box {
+  fill: var(--bg-sunken);
+}
+
+.node.is-done .node__box {
+  fill: var(--bg-raised);
+}
+
+.node:hover .node__box {
+  stroke: var(--ink);
+}
+
+.node.has-bp .node__box {
+  stroke: var(--danger);
+}
+
+.node__bp {
+  fill: var(--danger);
+  pointer-events: none;
+}
+
+.node__label {
+  font-family: var(--font-mono);
+  font-size: 8.5px;
+  fill: var(--ink);
+  pointer-events: none;
+}
+
+.node.is-layer .node__label {
+  font-size: 7.5px;
+  fill: var(--ink-muted);
+}
+
+.node__note {
+  font-family: var(--font-mono);
+  font-size: 7px;
+  fill: var(--ink-faint);
+  pointer-events: none;
+}
+
+/* "Run to here", revealed on hover so the graph stays quiet at rest. */
+.node__run {
+  opacity: 0;
+  cursor: pointer;
+}
+
+.node:hover .node__run {
+  opacity: 1;
+}
+
+.node__run rect {
+  fill: var(--bg);
+  stroke: var(--line-strong);
+}
+
+.node__run:hover rect {
+  fill: var(--accent-bg);
+  stroke: var(--accent-line);
+}
+
+.node__run-glyph {
+  fill: var(--accent);
+}
+
+/* Hide the note when the run button would sit on top of it. */
+.node:hover .node__note {
+  opacity: 0;
+}
+
+/* --- head marks ---------------------------------------------------------- */
+
+.head {
+  stroke: var(--line);
+  stroke-width: 0.4;
+  cursor: pointer;
+}
+
+.head:hover {
+  stroke: var(--ink);
+  stroke-width: 1;
+}
+
+.head.is-selected {
+  stroke: var(--data);
+  stroke-width: 1.4;
+}
+
+/* --- footer -------------------------------------------------------------- */
+
+.graph__foot {
+  display: flex;
+  align-items: center;
+  gap: var(--s-3);
+  white-space: nowrap;
+  padding: var(--s-1) var(--s-3);
+  border-top: 1px solid var(--line);
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+}
+
+.legend {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.legend__heads { margin-left: auto; }
+
+.legend__swatch {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+}
+
+.legend__swatch--bp { background: var(--danger); }
+.legend__swatch--pc { background: var(--accent-line); border-radius: 1px; }
+
+.legend__ramp {
+  width: 34px;
+  height: 7px;
+  border: 1px solid var(--line);
+  background: linear-gradient(to right, #ffffff, #93c5fd, #1d4ed8);
+}

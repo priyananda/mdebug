@@ -1,0 +1,196 @@
+@if (layout(); as g) {
+  <section class="graph">
+    <header class="graph__head">
+      <span class="graph__title">pipeline</span>
+      <span class="graph__hint">click a node to breakpoint &middot; &#9656;| to run there</span>
+      <button
+        type="button"
+        class="graph__compact"
+        [class.is-on]="compact()"
+        (click)="compact.set(!compact())"
+        title="Collapse the layer ladder"
+      >
+        compact
+      </button>
+    </header>
+
+    <div class="graph__scroll">
+      <svg
+        class="graph__svg"
+        [attr.viewBox]="'0 0 ' + g.width + ' ' + g.height"
+        preserveAspectRatio="xMidYMin meet"
+        role="group"
+        aria-label="Inference pipeline with breakpoint gutter"
+      >
+        <!-- ladder spine -->
+        @for (c of g.connectors; track $index) {
+          <line class="spine" [attr.x1]="c.x" [attr.y1]="c.y1" [attr.x2]="c.x" [attr.y2]="c.y2" />
+        }
+
+        <!-- program counter band -->
+        @if (activeRow(); as row) {
+          <rect
+            class="pc-band"
+            [class.is-halted]="haltedHere()"
+            x="0"
+            [attr.y]="row.y - 1"
+            [attr.width]="g.width"
+            [attr.height]="row.h + 2"
+          />
+          <path
+            class="pc-caret"
+            [attr.transform]="'translate(4,' + (row.y + row.h / 2) + ')'"
+            d="M0,-4 L5,0 L0,4 Z"
+          />
+        }
+
+        <!-- gutter + row labels -->
+        @for (row of g.rows; track row.index) {
+          <g class="row">
+            <rect
+              class="gutter"
+              x="0"
+              [attr.y]="row.y - 1"
+              [attr.width]="g.gutterWidth"
+              [attr.height]="row.h + 2"
+              role="button"
+              tabindex="0"
+              [attr.aria-label]="breakpointTitle(row.primaryStageId)"
+              (click)="toggle(row.primaryStageId)"
+              (keydown.enter)="toggle(row.primaryStageId)"
+            >
+              <title>{{ breakpointTitle(row.primaryStageId) }}</title>
+            </rect>
+
+            @if (breakpointAt(row.primaryStageId); as bp) {
+              <circle
+                class="bp"
+                [class.is-disabled]="!bp.enabled"
+                [class.is-conditional]="!!bp.condition"
+                [attr.cx]="g.gutterWidth / 2 + 1"
+                [attr.cy]="row.y + row.h / 2"
+                r="4"
+              />
+            }
+
+            @if (row.label) {
+              <text class="row-label" [attr.x]="g.gutterWidth + 2" [attr.y]="row.y + row.h / 2 + 3">
+                {{ row.label }}
+              </text>
+            }
+          </g>
+        }
+
+        <!-- nodes -->
+        @for (node of g.nodes; track node.stageId) {
+          <g
+            class="node"
+            [class.is-layer]="node.layer !== undefined"
+            [class.is-done]="completed().has(node.stageId)"
+            [class.has-bp]="!!breakpointAt(node.stageId)"
+            role="button"
+            tabindex="0"
+            [attr.aria-label]="breakpointTitle(node.stageId)"
+            (click)="toggle(node.stageId)"
+            (keydown.enter)="toggle(node.stageId)"
+          >
+            <title>{{ breakpointTitle(node.stageId) }}</title>
+            <rect
+              class="node__box"
+              [attr.x]="node.x"
+              [attr.y]="node.y"
+              [attr.width]="node.w"
+              [attr.height]="node.h"
+              rx="2"
+            />
+
+            @if (breakpointAt(node.stageId)) {
+              <rect
+                class="node__bp"
+                [attr.x]="node.x"
+                [attr.y]="node.y"
+                width="2.5"
+                [attr.height]="node.h"
+              />
+            }
+
+            @if (node.label) {
+              <text
+                class="node__label"
+                [attr.x]="node.layer !== undefined ? node.x + node.w - 5 : node.x + 8"
+                [attr.y]="node.y + node.h / 2 + 3.2"
+                [attr.text-anchor]="node.layer !== undefined ? 'end' : 'start'"
+              >
+                {{ node.label }}
+              </text>
+            }
+
+            @if (node.note) {
+              <text
+                class="node__note"
+                [attr.x]="node.x + node.w - 6"
+                [attr.y]="node.y + node.h / 2 + 3.2"
+                text-anchor="end"
+              >
+                {{ node.note }}
+              </text>
+            }
+
+            <g
+              class="node__run"
+              role="button"
+              tabindex="-1"
+              (click)="runToHere($event, node.stageId)"
+              (keydown.enter)="runToHere($event, node.stageId)"
+            >
+              <title>Run to {{ node.stageId }}</title>
+              <rect
+                [attr.x]="node.x + node.w - 13"
+                [attr.y]="node.y + 1"
+                width="12"
+                [attr.height]="node.h - 2"
+                rx="2"
+              />
+              <path
+                class="node__run-glyph"
+                [attr.transform]="'translate(' + (node.x + node.w - 9) + ',' + (node.y + node.h / 2) + ')'"
+                d="M0,-3.2 L3.4,0 L0,3.2 Z M4.4,-3.4 L5.6,-3.4 L5.6,3.4 L4.4,3.4 Z"
+              />
+            </g>
+          </g>
+        }
+
+        <!-- per-head density marks: also the head selector -->
+        @for (cell of g.headCells; track cell.layer + ':' + cell.head) {
+          <rect
+            class="head"
+            [class.is-selected]="isSelectedHead(cell.layer, cell.head)"
+            [attr.x]="cell.x"
+            [attr.y]="cell.y"
+            [attr.width]="cell.w"
+            [attr.height]="cell.h"
+            [attr.fill]="headFill(cell.layer, cell.head)"
+            role="button"
+            tabindex="-1"
+            (click)="selectHead(cell.layer, cell.head)"
+          >
+            <title>{{ headTitle(cell.layer, cell.head) }}</title>
+          </rect>
+        }
+      </svg>
+    </div>
+
+    <footer class="graph__foot">
+      <span class="legend">
+        <span class="legend__swatch legend__swatch--bp"></span> breakpoint
+      </span>
+      <span class="legend">
+        <span class="legend__swatch legend__swatch--pc"></span> cursor
+      </span>
+      <span class="legend legend__heads">
+        heads
+        <span class="legend__ramp" title="Left: diffuse attention. Right: focused."></span>
+      </span>
+    </footer>
+  </section>
+}

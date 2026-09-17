@@ -1,0 +1,120 @@
+:host { display: block; }
+
+.guide {
+  display: grid;
+  gap: var(--s-5);
+}
+
+.block { display: grid; gap: var(--s-2); }
+
+.block__title {
+  font-size: var(--fs-xs);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.block__body {
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+}
+
+.block__body--aside {
+  padding-left: var(--s-2);
+  border-left: 2px solid var(--line);
+}
+
+.defs {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr);
+  gap: var(--s-1) var(--s-2);
+  margin: 0;
+  font-size: var(--fs-sm);
+}
+
+.defs dt { white-space: nowrap; }
+.defs dd { margin: 0; color: var(--ink-muted); }
+
+.glyph { font-size: 8px; color: var(--ink-faint); }
+
+.clear {
+  justify-self: start;
+  padding: 0 var(--s-2);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+}
+
+.clear:hover { border-color: var(--danger); color: var(--danger); }
+
+.scenarios { display: grid; gap: var(--s-1); }
+
+.scenario {
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  background: var(--bg);
+}
+
+.scenario.is-active {
+  border-color: var(--data);
+  background: var(--bg);
+}
+
+.scenario__head {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  padding: var(--s-2);
+  background: none;
+  border: none;
+  text-align: left;
+}
+
+.scenario:hover { border-color: var(--line-strong); }
+
+.scenario__title {
+  font-size: var(--fs-sm);
+  font-weight: 600;
+}
+
+.scenario__blurb {
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+}
+
+.scenario__look {
+  padding: var(--s-2);
+  margin: 0 var(--s-2) var(--s-2);
+  border-left: 2px solid var(--data);
+  background: var(--data-bg);
+  font-size: var(--fs-xs);
+  color: var(--ink);
+}
+
+.block__toggle {
+  justify-self: start;
+  padding: 0;
+  background: none;
+  border: none;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.block__toggle:hover { color: var(--ink); }
+
+.notes {
+  display: grid;
+  gap: var(--s-1);
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+}
+
+.notes li {
+  padding-left: var(--s-2);
+  border-left: 2px solid var(--accent-line);
+}

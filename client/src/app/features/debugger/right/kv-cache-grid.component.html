@@ -1,0 +1,68 @@
+<section class="panel">
+  <header class="panel__head">
+    <h2 class="panel__title">kv cache</h2>
+    @if (kv()?.simulated) {
+      <span
+        class="badge badge--warn"
+        title="This model has no KV cache: server/infer.py recomputes the whole prefix every step. The grid shows what a cache would hold, not a measurement."
+        >simulated</span
+      >
+    }
+    @if (hasNorms()) {
+      <button
+        type="button"
+        class="chip"
+        [class.is-on]="mode() === 'norms'"
+        (click)="mode.set(mode() === 'norms' ? 'occupancy' : 'norms')"
+      >
+        &#8214;k&#8214;
+      </button>
+    }
+  </header>
+
+  @if (kv(); as k) {
+    <div class="grid">
+      <mdbg-matrix-canvas
+        [values]="values()"
+        [rows]="k.numLayers"
+        [cols]="k.sequenceLength"
+        [colormap]="colormap()"
+        [max]="max()"
+        [height]="gridHeight()"
+        (hovered)="hover.set($event)"
+        (picked)="selectLayer($event)"
+      />
+      <span class="grid__axis grid__axis--y">L0</span>
+      <span class="grid__axis grid__axis--y2">L{{ k.numLayers - 1 }}</span>
+      <span class="grid__axis grid__axis--x">position &rarr;</span>
+    </div>
+
+    <div class="readout">
+      @if (hoverLabel()) {
+        <span class="readout__hover">{{ hoverLabel() }}</span>
+      } @else {
+        <span class="readout__stats">
+          {{ k.numLayers }} layers &times; {{ k.sequenceLength }} positions &middot;
+          {{ residentLabel() }} resident
+        </span>
+      }
+    </div>
+
+    @if (mode() === 'occupancy') {
+      <div class="key">
+        <span class="key__item"><i class="key__sw key__sw--new"></i>this step</span>
+        <span class="key__item"><i class="key__sw key__sw--old"></i>resident</span>
+        <span class="key__item"><i class="key__sw key__sw--empty"></i>empty</span>
+      </div>
+    }
+
+    @if (k.simulated) {
+      <p class="caveat">
+        This model has no KV cache &mdash; it recomputes the whole prefix each step. The grid shows
+        what a cache <em>would</em> hold.
+      </p>
+    }
+  } @else {
+    <p class="empty">Run to a breakpoint to see the cache.</p>
+  }
+</section>

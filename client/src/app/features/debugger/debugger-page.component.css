@@ -1,0 +1,80 @@
+:host { display: block; height: 100%; }
+
+.shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: var(--header-h) minmax(0, 1fr);
+}
+
+.top {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  padding: 0 var(--s-3);
+  border-bottom: 1px solid var(--line-strong);
+  background: var(--bg);
+  font-size: var(--fs-sm);
+}
+
+.top__brand {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+.top__sep, .top__session, .top__model { color: var(--ink-faint); }
+.top__spacer { flex: 1; }
+
+.top__conn {
+  padding: 1px var(--s-2);
+  border-radius: 999px;
+  border: 1px solid var(--line-strong);
+  background: var(--bg-raised);
+  color: var(--ink-muted);
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+.top__conn[data-state='open'] {
+  border-color: var(--ok);
+  background: var(--ok-bg);
+  color: var(--ok);
+}
+
+.fatal {
+  display: grid;
+  gap: var(--s-2);
+  place-content: center;
+  text-align: center;
+  color: var(--ink-muted);
+}
+
+/* Three columns, each its own scroll context. min-height:0 is what makes
+   the children scroll instead of the page. */
+.cols {
+  display: grid;
+  grid-template-columns: var(--col-left) minmax(0, 1fr) var(--col-right);
+  min-height: 0;
+}
+
+.col {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--s-4);
+}
+
+.col--middle {
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: var(--s-4);
+  align-content: start;
+}
+
+.col--left {
+  border-right: 1px solid var(--line);
+  background: var(--bg-sunken);
+}
+
+.col--right {
+  border-left: 1px solid var(--line);
+}

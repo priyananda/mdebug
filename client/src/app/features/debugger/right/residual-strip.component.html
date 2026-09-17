@@ -1,0 +1,81 @@
+<section class="panel">
+  <header class="panel__head">
+    <h2 class="panel__title">residual stream</h2>
+    <span class="panel__where">{{ layerLabel() }} &middot; {{ hiddenSize() }}d</span>
+  </header>
+
+  @if (values(); as v) {
+    <div class="strip">
+      <mdbg-matrix-canvas
+        [values]="v"
+        [rows]="1"
+        [cols]="hiddenSize()"
+        [max]="absMax()"
+        [signed]="true"
+        colormap="diverging"
+        [height]="26"
+        (hovered)="hover.set($event)"
+      />
+    </div>
+
+    <svg
+      class="spark"
+      [attr.viewBox]="'0 0 ' + sparkW + ' ' + sparkH"
+      preserveAspectRatio="none"
+      aria-label="Residual vector"
+    >
+      <line class="spark__zero" x1="0" [attr.y1]="sparkH / 2" [attr.x2]="sparkW" [attr.y2]="sparkH / 2" />
+      <path class="spark__line" [attr.d]="sparkPath()" />
+    </svg>
+
+    <div class="readout">
+      @if (hoverLabel()) {
+        <span class="readout__hover">{{ hoverLabel() }}</span>
+      } @else {
+        @if (stats(); as s) {
+          <span class="stats">
+            <span><span class="stat__key">&#8214;x&#8214;</span> {{ fmt(s.l2) }}</span>
+            <span><span class="stat__key">mean</span> {{ fmt(s.mean, 3) }}</span>
+            <span><span class="stat__key">std</span> {{ fmt(s.std, 3) }}</span>
+            <span><span class="stat__key">min</span> {{ fmt(s.min) }}</span>
+            <span><span class="stat__key">max</span> {{ fmt(s.max) }}</span>
+          </span>
+        }
+      }
+    </div>
+
+    <div class="trend">
+      <div class="trend__head">
+        <span>&#8214;x&#8214; by layer</span>
+        <span class="trend__hint">step to extend</span>
+      </div>
+      <svg
+        class="trend__svg"
+        [attr.viewBox]="'0 0 ' + trendW + ' ' + trendH"
+        preserveAspectRatio="none"
+        aria-label="Residual norm by layer"
+      >
+        <path class="trend__line" [attr.d]="trendPath()" />
+        @for (d of trendDots(); track d.stageId) {
+          <circle class="trend__dot" [attr.cx]="d.x" [attr.cy]="d.y" r="2">
+            <title>L{{ d.layer }} · ||x|| = {{ fmt(d.l2) }}</title>
+          </circle>
+        }
+      </svg>
+    </div>
+
+    <div class="outliers">
+      <span class="outliers__label">outlier dims</span>
+      <ul class="outliers__list">
+        @for (o of outliers(); track o.dim) {
+          <li class="outlier" [class.is-negative]="o.value < 0">
+            <span class="outlier__dim">{{ o.dim }}</span>
+            <span class="outlier__value">{{ fmt(o.value, 1) }}</span>
+          </li>
+        }
+      </ul>
+    </div>
+  } @else {
+    <p class="empty">Run to a breakpoint to see the residual stream.</p>
+  }
+</section>

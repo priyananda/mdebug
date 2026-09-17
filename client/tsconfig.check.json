@@ -1,0 +1,11 @@
+/* Typechecks every source file, including ones not yet imported from main.ts.
+   `ng build` only compiles what is reachable, so this is what catches errors in
+   code that is written but not yet wired up. */
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "types": ["jasmine"]
+  },
+  "include": ["src/**/*.ts"]
+}

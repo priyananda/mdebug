@@ -1,0 +1,75 @@
+<div class="guide">
+  <section class="block">
+    <h2 class="block__title">how this works</h2>
+    <p class="block__body">
+      The model generates one token at a time. Each token walks the pipeline in the middle column
+      from top to bottom, and you can halt it anywhere along the way.
+    </p>
+  </section>
+
+  <section class="block">
+    <h2 class="block__title">controls</h2>
+    <dl class="defs">
+      <dt><span class="glyph">&#9654;</span> start</dt>
+      <dd>Runs from the beginning. Clears anything generated before.</dd>
+      <dt><span class="glyph">&#8677;</span> continue</dt>
+      <dd>Runs until the next breakpoint fires, or until generation finishes.</dd>
+      <dt><span class="glyph">&#8628;</span> step</dt>
+      <dd>
+        Advances exactly one stage &mdash; one node in the graph. <kbd>shift</kbd>-click for ten.
+      </dd>
+      <dt><span class="glyph">&#9632;</span> stop</dt>
+      <dd>Aborts the run. Everything captured so far stays inspectable.</dd>
+    </dl>
+    <p class="block__body block__body--aside">
+      There is no step-into or step-over: a stage is the smallest unit of execution, so there is
+      nothing nested to step into. To skip ahead, hover any node and press
+      <span class="glyph">&#9656;|</span> to run straight to it.
+    </p>
+  </section>
+
+  <section class="block">
+    <h2 class="block__title">breakpoints</h2>
+    <p class="block__body">
+      Click the gutter or any node to set one. The eight marks inside each attention cell are that
+      layer's heads, shaded by how focused they are right now &mdash; click one to inspect it.
+    </p>
+    @if (breakpointCount()) {
+      <button type="button" class="clear" (click)="clearBreakpoints()">
+        clear {{ breakpointCount() }} breakpoint{{ breakpointCount() === 1 ? '' : 's' }}
+      </button>
+    }
+  </section>
+
+  <section class="block">
+    <h2 class="block__title">things to try</h2>
+    <ul class="scenarios">
+      @for (s of scenarios; track s.id) {
+        <li class="scenario" [class.is-active]="active() === s.id">
+          <button type="button" class="scenario__head" (click)="apply(s)">
+            <span class="scenario__title">{{ s.title }}</span>
+            <span class="scenario__blurb">{{ s.blurb }}</span>
+          </button>
+          @if (active() === s.id) {
+            <p class="scenario__look">{{ s.lookFor }}</p>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+
+  @if (notes().length) {
+    <section class="block block--notes">
+      <button type="button" class="block__toggle" (click)="showNotes.set(!showNotes())">
+        about this model {{ showNotes() ? '−' : '+' }}
+      </button>
+      @if (showNotes()) {
+        <ul class="notes">
+          @for (n of notes(); track n) {
+            <li>{{ n }}</li>
+          }
+        </ul>
+      }
+    </section>
+  }
+</div>

@@ -1,0 +1,113 @@
+.prompt {
+  display: grid;
+  gap: var(--s-2);
+}
+
+.prompt__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+}
+
+.prompt__label {
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.prompt__toggle {
+  background: none;
+  border: none;
+  padding: 0;
+  font-size: var(--fs-xs);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--ink-faint);
+}
+
+.prompt__toggle:hover, .prompt__toggle.is-open { color: var(--ink); }
+
+.prompt__input {
+  width: 100%;
+  resize: vertical;
+  padding: var(--s-2) var(--s-3);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  line-height: var(--lh-normal);
+}
+
+.prompt__input:focus { border-color: var(--ink); }
+.prompt__input:disabled { background: var(--bg-raised); color: var(--ink-muted); }
+
+.params {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--s-3);
+  padding: var(--s-2) var(--s-3);
+  background: var(--bg-sunken);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+}
+
+.param {
+  display: flex;
+  align-items: center;
+  gap: var(--s-2);
+  font-size: var(--fs-sm);
+}
+
+.param--wide { flex: 1; min-width: 150px; }
+.param__label { color: var(--ink-muted); white-space: nowrap; }
+
+.param__input {
+  width: 76px;
+  padding: 1px var(--s-1);
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  font-size: var(--fs-sm);
+}
+
+.param__range { flex: 1; min-width: 60px; accent-color: var(--ink); }
+
+.tokens { display: grid; gap: var(--s-1); }
+
+.tokens__strip {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2px;
+  max-height: 72px;
+  overflow-y: auto;
+  padding: var(--s-1);
+  border: 1px dashed var(--line);
+  border-radius: var(--radius);
+}
+
+.tokens__strip.is-over { border-color: var(--danger); }
+
+/* Token chips need visible boundaries -- the whole point is seeing where the
+   tokenizer cut, which whitespace alone cannot show. */
+.tok {
+  padding: 0 3px;
+  background: var(--bg-raised);
+  border: 1px solid var(--line);
+  border-radius: 2px;
+  font-size: var(--fs-sm);
+  white-space: pre;
+}
+
+.tok:hover { background: var(--data-bg); border-color: var(--data); }
+
+.tokens__empty, .tokens__meta {
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+}
+
+.tokens__meta {
+  display: flex;
+  gap: var(--s-2);
+}
+
+.tokens__meta .is-over, .tokens__warn { color: var(--danger); }

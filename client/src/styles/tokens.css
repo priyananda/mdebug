@@ -1,0 +1,63 @@
+/* Design tokens. Everything visual in the app resolves to one of these. */
+:root {
+  /* Type. One family: this is a tool for people who read code. */
+  --font-mono: ui-monospace, SFMono-Regular, "SF Mono", Menlo, Consolas,
+               "Liberation Mono", "Courier New", monospace;
+  --fs-xs: 10.5px;
+  --fs-sm: 11.5px;
+  --fs-md: 12.5px;
+  --fs-lg: 14px;
+  --fs-xl: 17px;
+  --fs-2xl: 22px;
+  --lh-tight: 1.35;
+  --lh-normal: 1.55;
+
+  /* Surfaces — white, with two barely-there greys for depth. */
+  --bg: #ffffff;
+  --bg-sunken: #fbfbfa;
+  --bg-raised: #f5f5f4;
+  --bg-hover: #f0f0ef;
+
+  /* Ink */
+  --ink: #18181b;
+  --ink-muted: #71717a;
+  --ink-faint: #a1a1aa;
+  --ink-inverse: #ffffff;
+
+  /* Lines */
+  --line: #e7e7e4;
+  --line-strong: #d4d4d0;
+  --line-focus: #18181b;
+
+  /* Semantics.
+     amber = the program counter, red = breakpoints, blue = data, green = done. */
+  --accent: #b45309;
+  --accent-bg: #fef3c7;
+  --accent-line: #f59e0b;
+  --danger: #b91c1c;
+  --danger-bg: #fee2e2;
+  --data: #1d4ed8;
+  --data-bg: #dbeafe;
+  --ok: #047857;
+  --ok-bg: #d1fae5;
+
+  /* Spacing — 4px base. */
+  --s-1: 4px;
+  --s-2: 8px;
+  --s-3: 12px;
+  --s-4: 16px;
+  --s-5: 24px;
+  --s-6: 32px;
+  --s-7: 48px;
+
+  --radius: 3px;
+  --radius-lg: 5px;
+
+  /* Layout */
+  --col-left: 260px;
+  --col-right: 380px;
+  --header-h: 38px;
+
+  --z-overlay: 50;
+  --z-tooltip: 100;
+}
