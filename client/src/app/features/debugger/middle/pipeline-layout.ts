@@ -97,16 +97,17 @@ export function layoutPipeline(model: ModelInfo, options: LayoutOptions = {}): G
   let y = PAD_TOP;
   let index = 0;
 
-  const pushGlobal = (kind: StageKind, note: string) => {
+  const pushGlobal = (kind: StageKind, note: string, centered: boolean) => {
     const id = stageId({ kind });
+    const delta = (centered ? 50 : 0)
     const node: GraphNode = {
       stageId: id,
       kind,
       label: labelFor(kind),
       note,
-      x: NODE_X,
+      x: NODE_X + delta,
       y,
-      w: NODE_W,
+      w: NODE_W - 2 * delta,
       h: GLOBAL_H,
     };
     nodes.push(node);
@@ -114,9 +115,9 @@ export function layoutPipeline(model: ModelInfo, options: LayoutOptions = {}): G
     y += GLOBAL_H + GLOBAL_GAP;
   };
 
-  pushGlobal('tokenize', 'byte-level BPE');
+  pushGlobal('tokenize', 'byte-level BPE', true);
   for (const kind of PRE_LAYER_STAGES) {
-    pushGlobal(kind, `tok + pos, ${model.hiddenSize}d`);
+    pushGlobal(kind, `tok + pos, ${model.hiddenSize}d`, true);
   }
 
   // --- the layer ladder ------------------------------------------------------
@@ -191,7 +192,7 @@ export function layoutPipeline(model: ModelInfo, options: LayoutOptions = {}): G
     final_norm: 'RMSNorm',
   };
   for (const kind of POST_LAYER_STAGES) {
-    pushGlobal(kind, notes[kind] ?? '');
+    pushGlobal(kind, notes[kind] ?? '', true);
   }
 
   const height = y - GLOBAL_GAP + PAD_TOP;
