@@ -1,0 +1,86 @@
+@if (breakpoints().length) {
+  <section class="bps">
+    <header class="bps__head">
+      <span class="bps__title">breakpoints ({{ breakpoints().length }})</span>
+      <button type="button" class="bps__clear" (click)="store.clearAll()">clear all</button>
+    </header>
+
+    <ul class="bps__list">
+      @for (bp of breakpoints(); track bp.id) {
+        <li class="bp" [class.is-disabled]="!bp.enabled">
+          <div class="bp__row">
+            <button
+              type="button"
+              class="bp__dot"
+              [class.is-off]="!bp.enabled"
+              [class.is-conditional]="!!bp.condition"
+              [title]="bp.enabled ? 'Disable' : 'Enable'"
+              (click)="store.setEnabled(bp.id, !bp.enabled)"
+            ></button>
+
+            <span class="bp__stage">{{ stageLabel(bp) }}</span>
+
+            @if (bp.condition) {
+              <button
+                type="button"
+                class="bp__cond"
+                title="Edit condition"
+                (click)="openEditor(bp)"
+              >
+                {{ conditionLabel(bp) }}
+              </button>
+            } @else {
+              <button type="button" class="bp__add" title="Add a condition" (click)="openEditor(bp)">
+                + when
+              </button>
+            }
+
+            @if (bp.hitCount) {
+              <span class="bp__hits" [title]="bp.hitCount + ' hits'">{{ bp.hitCount }}</span>
+            }
+
+            <button
+              type="button"
+              class="bp__remove"
+              title="Remove"
+              (click)="store.remove(bp.id)"
+            >
+              &times;
+            </button>
+          </div>
+
+          @if (editing() === bp.id) {
+            <div class="editor">
+              <select class="editor__field" [value]="draftKind()" (change)="onKind($event)">
+                @for (k of availableKinds(); track k) {
+                  <option [value]="k" [selected]="k === draftKind()">{{ label(k) }}</option>
+                }
+              </select>
+              <select class="editor__field editor__field--op" [value]="draftOp()" (change)="onOp($event)">
+                @for (o of ops(); track o) {
+                  <option [value]="o" [selected]="o === draftOp()">{{ o }}</option>
+                }
+              </select>
+              <input
+                class="editor__field editor__field--value"
+                [type]="isText() ? 'text' : 'number'"
+                step="any"
+                [value]="draftValue()"
+                (input)="onValue($event)"
+              />
+              <div class="editor__actions">
+                <button type="button" class="editor__btn" (click)="commit(bp)">set</button>
+                @if (bp.condition) {
+                  <button type="button" class="editor__btn" (click)="clearCondition(bp)">
+                    remove
+                  </button>
+                }
+                <button type="button" class="editor__btn" (click)="editing.set(null)">cancel</button>
+              </div>
+            </div>
+          }
+        </li>
+      }
+    </ul>
+  </section>
+}

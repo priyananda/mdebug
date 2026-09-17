@@ -1,0 +1,113 @@
+:host { display: block; min-width: 0; }
+
+.picker {
+  display: flex;
+  align-items: center;
+  gap: var(--s-1);
+}
+
+.picker__select {
+  padding: 0 2px;
+  background: var(--bg);
+  border: 1px solid var(--line-strong);
+  border-radius: var(--radius);
+  font-size: var(--fs-xs);
+}
+
+.plot {
+  position: relative;
+  border: 1px solid var(--line);
+  min-width: 0;
+}
+
+.plot.is-stale { opacity: 0.55; }
+
+/* Marks the query row whose distribution is broken out below. */
+.plot__rowmark {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 0;
+  border-top: 1px solid var(--accent-line);
+  pointer-events: none;
+  opacity: 0.7;
+}
+
+.plot__rowmark.is-locked {
+  border-top-width: 2px;
+  border-top-color: var(--danger);
+  opacity: 1;
+}
+
+.plot__axis {
+  position: absolute;
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+  background: var(--bg);
+  padding: 0 2px;
+  pointer-events: none;
+}
+
+.plot__axis--y { top: 2px; left: 2px; }
+.plot__axis--x { bottom: 2px; right: 2px; }
+
+.readout {
+  min-height: 15px;
+  font-size: var(--fs-xs);
+}
+
+.readout__hover { color: var(--ink); }
+.readout__stats { color: var(--ink-faint); }
+
+.row { display: grid; gap: var(--s-1); }
+
+.row__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--s-2);
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+}
+
+.row__hint { color: var(--ink-faint); }
+
+.bars {
+  display: grid;
+  gap: 1px;
+  max-height: 132px;
+  overflow-y: auto;
+}
+
+.bar {
+  display: grid;
+  grid-template-columns: 8ch minmax(0, 1fr) 5ch;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--fs-xs);
+}
+
+.bar__label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  color: var(--ink-muted);
+}
+
+.bar__track {
+  height: 8px;
+  background: var(--bg-raised);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.bar__fill {
+  display: block;
+  height: 100%;
+  background: var(--data);
+}
+
+.bar__value {
+  text-align: right;
+  color: var(--ink-faint);
+}

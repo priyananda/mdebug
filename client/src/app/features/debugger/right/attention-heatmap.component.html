@@ -1,0 +1,123 @@
+<section class="panel">
+  <header class="panel__head">
+    <h2 class="panel__title">attention</h2>
+    <div class="picker">
+      <select
+        class="picker__select"
+        [value]="inspect.selectedLayer()"
+        (change)="onLayer($event)"
+        aria-label="Layer"
+      >
+        @for (l of layers(); track l) {
+          <option [value]="l" [selected]="l === inspect.selectedLayer()">L{{ l }}</option>
+        }
+      </select>
+      <select
+        class="picker__select"
+        [value]="inspect.selectedHead()"
+        (change)="onHead($event)"
+        aria-label="Head"
+      >
+        @for (h of heads(); track h) {
+          <option [value]="h" [selected]="h === inspect.selectedHead()">head {{ h }}</option>
+        }
+      </select>
+      <button
+        type="button"
+        class="chip"
+        [class.is-on]="!inspect.layerPinned()"
+        (click)="toggleFollow()"
+        title="Keep the selected layer in step with the program counter"
+      >
+        follow
+      </button>
+      <button type="button" class="chip" (click)="toggleScale()" title="Display scale">
+        {{ inspect.attentionScale() }}
+      </button>
+    </div>
+  </header>
+
+  @if (inspect.oversized()) {
+    <div class="notice">
+      <p>
+        {{ inspect.oversized() }}&times;{{ inspect.oversized() }} is a large matrix &mdash;
+        {{ cellCount() }} cells.
+      </p>
+      <button type="button" class="chip" (click)="inspect.confirmOversized()">load anyway</button>
+    </div>
+  } @else if (inspect.error()) {
+    <div class="notice notice--error">
+      <p>{{ inspect.error()?.message }}</p>
+    </div>
+  } @else {
+    @if (tile(); as a) {
+      <div class="plot" [class.is-stale]="inspect.loading()">
+        <mdbg-matrix-canvas
+          [values]="a.weights"
+          [rows]="a.sequenceLength"
+          [cols]="a.sequenceLength"
+          [max]="displayMax()"
+          [scale]="inspect.attentionScale()"
+          colormap="sequential"
+          [square]="true"
+          (hovered)="hover.set($event)"
+          (picked)="lockRow($event)"
+        />
+        @if (focusRow() !== null) {
+          <div
+            class="plot__rowmark"
+            [style.top.%]="rowMarkTop()"
+            [class.is-locked]="inspect.lockedQuery() !== null"
+          ></div>
+        }
+        <span class="plot__axis plot__axis--y">query &darr;</span>
+        <span class="plot__axis plot__axis--x">key &rarr;</span>
+      </div>
+
+      <div class="readout">
+        @if (hoverLabel()) {
+          <span class="readout__hover">{{ hoverLabel() }}</span>
+        } @else {
+          <span class="readout__stats">
+            max {{ prob(a.maxWeight) }} &middot; entropy {{ fmt(a.meanEntropy) }} nats
+            &middot; sink {{ prob(a.sinkMass) }}
+          </span>
+        }
+      </div>
+
+      <div class="row">
+        <div class="row__head">
+          <span
+            >query <strong>{{ focusLabel() }}</strong></span
+          >
+          @if (inspect.lockedQuery() !== null) {
+            <button type="button" class="chip chip--tiny" (click)="inspect.lockedQuery.set(null)">
+              unlock
+            </button>
+          } @else {
+            <span class="row__hint">click the map to lock a row</span>
+          }
+        </div>
+        <ul class="bars">
+          @for (bar of rowBars(); track bar.col) {
+            <li class="bar">
+              <span class="bar__label" [title]="'position ' + bar.col">{{ bar.label }}</span>
+              <span class="bar__track">
+                <span class="bar__fill" [style.width.%]="bar.width"></span>
+              </span>
+              <span class="bar__value">{{ prob(bar.weight) }}</span>
+            </li>
+          }
+        </ul>
+      </div>
+    } @else {
+      <p class="empty">
+        @if (inspect.loading()) {
+          loading tile&hellip;
+        } @else {
+          Run to a breakpoint to see attention.
+        }
+      </p>
+    }
+  }
+</section>

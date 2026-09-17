@@ -1,0 +1,80 @@
+<section class="prompt">
+  <header class="prompt__head">
+    <label class="prompt__label" for="prompt-input">prompt</label>
+    <button
+      type="button"
+      class="prompt__toggle"
+      [class.is-open]="showParams()"
+      (click)="showParams.set(!showParams())"
+    >
+      params
+    </button>
+  </header>
+
+  <textarea
+    id="prompt-input"
+    class="prompt__input"
+    rows="2"
+    spellcheck="false"
+    autocomplete="off"
+    placeholder="Type the text the model should continue…"
+    [value]="draft().prompt"
+    [disabled]="locked()"
+    (input)="onPrompt($event)"
+  ></textarea>
+
+  @if (showParams()) {
+    <div class="params">
+      <label class="param">
+        <span class="param__label">max new</span>
+        <input
+          class="param__input"
+          type="number"
+          min="1"
+          [max]="model()?.limits?.maxNewTokens ?? 64"
+          [value]="draft().maxNewTokens"
+          [disabled]="locked()"
+          (input)="onMaxTokens($event)"
+        />
+      </label>
+
+      <label class="param">
+        <span class="param__label">sampling</span>
+        <select class="param__input" [value]="draft().samplingMode" (change)="onSamplingMode($event)">
+          <option value="greedy" [selected]="draft().samplingMode === 'greedy'">greedy</option>
+          <option value="temperature" [selected]="draft().samplingMode === 'temperature'">temperature</option>
+          <option value="top_k" [selected]="draft().samplingMode === 'top_k'">top-k</option>
+        </select>
+      </label>
+
+      <label class="param param--wide">
+        <span class="param__label">temp {{ draft().temperature ?? 1 }}</span>
+        <input
+          class="param__range"
+          type="range"
+          min="0.1"
+          max="2"
+          step="0.05"
+          [value]="draft().temperature ?? 1"
+          (input)="onTemperature($event)"
+        />
+      </label>
+    </div>
+  }
+
+  <div class="tokens">
+    <div class="tokens__strip" [class.is-over]="overLimit()">
+      @for (t of preview(); track $index) {
+        <span class="tok" [title]="'id ' + t.id + ' · position ' + t.position">{{ t.display }}</span>
+      } @empty {
+        <span class="tokens__empty">no tokens yet</span>
+      }
+    </div>
+    <div class="tokens__meta">
+      <span [class.is-over]="overLimit()">{{ preview().length }} tokens</span>
+      @if (overLimit()) {
+        <span class="tokens__warn">over the {{ model()?.limits?.maxPromptTokens }} limit</span>
+      }
+    </div>
+  </div>
+</section>

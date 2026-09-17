@@ -1,0 +1,70 @@
+<main class="page">
+  <div class="sheet">
+    <header class="brand">
+      <h1>mdebug</h1>
+      <p class="tagline">A debugger for language model inference.</p>
+    </header>
+
+    <p class="blurb">
+      Set breakpoints inside a transformer's forward pass. Halt on a layer, inspect
+      attention, the KV cache and the residual stream, then continue.
+    </p>
+
+    <div class="choice">
+      <button
+        type="button"
+        class="card card--primary"
+        [disabled]="creating()"
+        (click)="newSession()"
+      >
+        <span class="card__key">&#9656;</span>
+        <span class="card__body">
+          <span class="card__title">{{ creating() ? 'Starting…' : 'New session' }}</span>
+          <span class="card__sub">Write a prompt, set breakpoints, run</span>
+        </span>
+      </button>
+
+      <div class="card card--list">
+        <span class="card__body">
+          <span class="card__title">Continue an existing session</span>
+          @if (recents.all().length) {
+            <ul class="recent">
+              @for (s of recents.all(); track s.id) {
+                <li>
+                  <button type="button" class="recent__item" (click)="resume(s.id)">
+                    <span class="recent__prompt">{{ s.prompt || '(no prompt)' }}</span>
+                    <span class="recent__meta">
+                      <span class="recent__id">{{ s.id }}</span>
+                      <span>{{ when(s.createdAt) }}</span>
+                      <span
+                        class="recent__forget"
+                        role="button"
+                        tabindex="0"
+                        title="Forget this session"
+                        (click)="forget($event, s.id)"
+                        (keydown.enter)="forget($event, s.id)"
+                        >&times;</span
+                      >
+                    </span>
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <span class="card__sub card__sub--empty">No previous sessions on this machine.</span>
+          }
+        </span>
+      </div>
+    </div>
+
+    @if (error()) {
+      <p class="error">{{ error() }}</p>
+    }
+
+    <footer class="foot">
+      <span>20 layers &middot; 8 heads &middot; 512 hidden</span>
+      <span class="foot__sep">/</span>
+      <span>{{ backend }}</span>
+    </footer>
+  </div>
+</main>

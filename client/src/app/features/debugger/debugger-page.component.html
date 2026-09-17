@@ -1,0 +1,34 @@
+<div class="shell">
+  <header class="top">
+    <a class="top__brand" routerLink="/">mdebug</a>
+    <span class="top__sep">/</span>
+    <span class="top__model">{{ sessions.model()?.name ?? 'loading model…' }}</span>
+    <span class="top__spacer"></span>
+    <span class="top__session">{{ sessionId() }}</span>
+    <span class="top__conn" [attr.data-state]="sessions.connection()">{{ sessions.connection() }}</span>
+  </header>
+
+  @if (openError()) {
+    <div class="fatal">
+      <p>{{ openError() }}</p>
+      <a routerLink="/">Back to start</a>
+    </div>
+  } @else {
+    <div class="cols">
+      <section class="col col--left" aria-label="Guide">
+        <mdbg-guide-panel />
+      </section>
+
+      <section class="col col--middle" aria-label="Execution">
+        <mdbg-prompt-box />
+        <mdbg-control-bar />
+        <mdbg-breakpoint-list />
+        <mdbg-pipeline-graph />
+      </section>
+
+      <section class="col col--right" aria-label="Visualizations">
+        <mdbg-viz-panel />
+      </section>
+    </div>
+  }
+</div>

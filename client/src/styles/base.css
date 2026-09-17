@@ -1,0 +1,72 @@
+/* Reset + the handful of global rules worth having. */
+*, *::before, *::after { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--font-mono);
+  font-size: var(--fs-md);
+  line-height: var(--lh-normal);
+  -webkit-font-smoothing: antialiased;
+  font-variant-ligatures: none;
+  font-variant-numeric: tabular-nums;
+}
+
+h1, h2, h3, h4, p, ul, ol, figure { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+
+button, input, textarea, select {
+  font: inherit;
+  color: inherit;
+  font-variant-numeric: inherit;
+}
+
+button { cursor: pointer; }
+button:disabled { cursor: default; }
+
+a { color: var(--data); text-decoration: none; }
+a:hover { text-decoration: underline; }
+
+code, kbd { font-family: var(--font-mono); }
+
+kbd {
+  background: var(--bg-raised);
+  border: 1px solid var(--line-strong);
+  border-bottom-width: 2px;
+  border-radius: var(--radius);
+  padding: 0 4px;
+  font-size: var(--fs-xs);
+}
+
+/* One focus treatment everywhere: a hard 2px ring. No fuzzy shadows. */
+:focus-visible {
+  outline: 2px solid var(--line-focus);
+  outline-offset: 1px;
+}
+:focus:not(:focus-visible) { outline: none; }
+
+::selection { background: var(--accent-bg); }
+
+/* Thin scrollbars — the three columns each scroll, so chrome should be quiet. */
+* { scrollbar-width: thin; scrollbar-color: var(--line-strong) transparent; }
+*::-webkit-scrollbar { width: 9px; height: 9px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb {
+  background: var(--line-strong);
+  border: 2px solid var(--bg);
+  border-radius: 5px;
+}
+*::-webkit-scrollbar-thumb:hover { background: var(--ink-faint); }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
