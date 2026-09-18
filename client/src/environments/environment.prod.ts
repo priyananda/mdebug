@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
-  // The Python server does not exist yet. Flip this once it is deployed, and
-  // note that GitHub Pages is HTTPS-only: apiBase must be https/wss.
-  useMock: true,
-  apiBase: 'https://mdebug-server.example.run.app',
+  // GitHub Pages is HTTPS-only, so apiBase must be https -- the WebSocket URL
+  // is derived from it in http-inference-api.ts, which gives wss for free.
+  useMock: false,
+  apiBase: 'https://mdebug-server-vutzb66e2a-uc.a.run.app',
 };
