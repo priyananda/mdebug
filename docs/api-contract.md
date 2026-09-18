@@ -1,12 +1,13 @@
 # mdebug — client/server API contract
 
-**Status:** v1 draft. The client implements this in full against a mock engine
-(`client/src/app/core/api/mock/`). The Python server does not exist yet; this
-document is what it should be built against.
+**Status:** implemented on both sides. The client implements this against a
+mock engine (`client/src/app/core/api/mock/`) and against the real backend
+(`client/src/app/core/api/http/`); the server implements it in `server/app/`.
 
-The normative TypeScript lives in `client/src/app/core/models/`. Where this
-document and that code disagree, the code wins — but they should not disagree,
-and a PR changing one should change the other.
+The normative TypeScript lives in `client/src/app/core/models/` and the Python
+mirror in `server/app/pipeline.py`. Where this document and the code disagree,
+the code wins — but they should not disagree, and a change to one should change
+the others.
 
 ---
 
@@ -383,20 +384,26 @@ interface KvSnapshot {
 }
 ```
 
-**The checked-in model has no KV cache.** `server/infer.py` re-runs the full
-forward pass over the entire prefix for every token, so there is nothing to
-measure. Two acceptable responses:
+**The checked-in model has no KV cache** — `server/infer.py` re-runs the full
+forward pass over the entire prefix for every token. The server therefore adds
+one, in `server/app/runner.py`, rather than reporting a reconstruction.
 
-1. **Add a real cache** — the right answer. It is a contained change to
-   `GroupedQueryAttention.forward` and `QwenModel.forward`, and it speeds
-   generation up by roughly a factor of `T`. Then `hasKvCache: true` and
-   `simulated: false`.
-2. Report `hasKvCache: false` and `simulated: true`. The client renders a
-   "simulated" badge explaining that this model recomputes the prefix each step.
+That runner re-expresses `QwenModel.forward` as a generator over stages, keeps
+rotated keys and values per layer, and applies RoPE at explicit absolute
+positions — the last part being what makes a cached decode correct rather than
+merely fast, since `RotaryEmbedding.forward` derives its positions from the
+input's own length. `src/model.py` is left untouched;
+`server/tests/test_runner_parity.py` asserts the cached path produces the same
+logits and the same greedy tokens as the model's own forward pass, against the
+real checkpoint.
 
-What is **not** acceptable is `simulated: false` on reconstructed data. For this
-audience, presenting fiction as measurement is the fastest possible way to lose
-trust in everything else on screen.
+So this server reports `hasKvCache: true` and `simulated: false`, and the grid
+shows measured occupancy and real per-cell `||k||`.
+
+What is **not** acceptable is `simulated: false` on reconstructed data. A server
+that cannot cache must say `simulated: true` and let the client badge it. For
+this audience, presenting fiction as measurement is the fastest possible way to
+lose trust in everything else on screen.
 
 ---
 
@@ -467,23 +474,48 @@ server returns `session_not_found` and the client offers a fresh one.
 
 ---
 
-## 9. What the server has to grow
+## 9. Implementation notes
 
-In rough order of difficulty:
+The backend lives in `server/app/`:
 
-1. **A web layer.** There is none — no FastAPI, no WebSocket, no ASGI server.
-2. **Stage-level execution control.** `QwenModel.forward` runs start to finish.
-   It needs to become steppable — a generator over stages, or hooks plus a
-   condition variable — so a breakpoint can halt between layer 7 and layer 8.
-3. **Attention capture.** `GroupedQueryAttention.forward` computes `attn` and
-   discards it (`server/src/model.py:90`). It needs to be retained, quantized on
-   capture (u8 — see §6), and bounded: at T=192 keeping every layer/head/step is
-   ~24 MB per session as f32, ~120 MB at T=512. Honour
-   `SessionConfig.captureAttention` and LRU-evict old steps.
-4. **A KV cache** (§7), if the KV visualization is to show a real one.
-5. **Sequence-length limits.** `seq_len` is 1024 in `src/config.py`; a 1024×1024
-   attention matrix is neither transferable nor legible. Enforce
-   `ModelLimits` server-side.
+| file | role |
+|---|---|
+| `runner.py` | `QwenModel.forward` as a generator over stages, with a KV cache, position-aware RoPE and attention capture |
+| `session.py` | run loop, breakpoints, halting, event fan-out, halt payloads |
+| `breakpoints.py` | the condition union as dict dispatch, plus the stage compatibility matrix |
+| `encoding.py` | the `EncodedArray` wire format |
+| `pipeline.py` | the Python mirror of `pipeline.model.ts` |
+| `main.py` | the HTTP and WebSocket surface |
+
+Three things worth knowing if you change it:
+
+**Stepping is a generator, not threads.** Advancing the generator by one is
+exactly one stage, so the session can halt between any two without locks in the
+model code. The blocking torch work runs in the default executor; breakpoint
+evaluation and event fan-out stay on the event loop.
+
+**Attention is stored in the wire format.** A causal matrix packed
+lower-triangular *is* the concatenation of its rows, so each query row's
+quantized bytes are appended once and a tile for length `T` is the first
+`T(T+1)/2` bytes. No duplication between steps: about 3 MB per run for a 20x8
+model at the 192-token cap, which is why no eviction is needed.
+
+**Sequence length is capped well below `seq_len`.** `src/config.py` says 1024;
+a 1024x1024 attention matrix is 84 MB as u8 for the full tensor and illegible
+besides. `ModelLimits` defaults to 128 prompt / 64 new / 192 total, enforced
+server-side and overridable by environment variable.
+
+### Running it
+
+```bash
+cd server
+python -m venv .venv && .venv/bin/pip install -r requirements-dev.txt
+.venv/bin/python run.py          # http://localhost:8000
+.venv/bin/python -m pytest       # 40 tests, needs the checkpoint
+```
+
+Point the client at it by setting `useMock: false` in
+`client/src/environments/environment.ts`.
 
 ### Deployment notes
 
