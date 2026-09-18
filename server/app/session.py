@@ -34,7 +34,19 @@ from .runtime import Runtime
 STAGE_EVENT_RATE_LIMIT = 30
 _MIN_STAGE_INTERVAL = 1.0 / STAGE_EVENT_RATE_LIMIT
 
-TOP_K = 50
+#: How many candidates ride along in `halted` and `token_emitted`.
+#:
+#: Cut from 50 after measuring: this model puts ~98.3 % of the mass on the
+#: top-1 token, and ranks 2-50 share the remaining 0.7 % between them, so the
+#: tail was costing real bytes on every token to show nothing. Twelve still
+#: covers ~98.7 % and leaves eleven visible alternatives, which is what the
+#: panel is for.
+#:
+#: `runner.TOP_K_STORED` is deliberately larger: the full list stays on the
+#: server so `GET .../logits?k=` can still widen it on demand, and `k=0` still
+#: returns the whole vocabulary. This is the contract's rule 1 -- eager
+#: payloads are bounded, depth is fetched.
+TOP_K = 12
 
 
 class SessionClosed(Exception):
@@ -522,12 +534,31 @@ class Session:
             "simulated": False,
         }
 
-    def _top_k(self, sample: SampleResult | None, step: int) -> dict[str, Any] | None:
+    def _top_k(
+        self, sample: SampleResult | None, step: int, limit: int = TOP_K
+    ) -> dict[str, Any] | None:
         if sample is None:
             return None
         tokenizer = self.runtime.tokenizer
+
+        ids = sample.top_ids[:limit]
+        logits = sample.top_logits[:limit]
+        probs = sample.top_probs[:limit]
+
+        # Truncating must never hide the token that was actually emitted, or
+        # the panel loses the one row it exists to highlight. Under greedy
+        # sampling the chosen token is rank 0 and this never fires; under
+        # temperature it can fall outside a short list. Its probability is by
+        # construction no greater than anything kept, so appending preserves
+        # the descending order the client renders in.
+        if sample.token_id not in ids and sample.token_id in sample.top_ids:
+            at = sample.top_ids.index(sample.token_id)
+            ids = ids + [sample.top_ids[at]]
+            logits = logits + [sample.top_logits[at]]
+            probs = probs + [sample.top_probs[at]]
+
         entries = []
-        for token_id, logit, prob in zip(sample.top_ids, sample.top_logits, sample.top_probs):
+        for token_id, logit, prob in zip(ids, logits, probs):
             piece = tokenizer.id_to_token(token_id)
             entries.append(
                 {
@@ -634,11 +665,8 @@ class Session:
             return {"step": step, "k": 0, "values": encoding.encode_f32(full)}
         if sample is None:
             return None
-        payload = self._top_k(sample, step)
-        if payload and k < len(payload["entries"]):
-            payload["entries"] = payload["entries"][:k]
-            payload["k"] = k
-        return payload
+        # The stored list is the ceiling; `k` beyond it simply returns it all.
+        return self._top_k(sample, step, limit=k)
 
 
 def _advance(stages: Iterator[StageOutcome]) -> StageOutcome | None:

@@ -21,6 +21,7 @@ ROOT = Path(__file__).resolve().parents[1]
 sys.path.insert(0, str(ROOT))
 
 from app.main import app  # noqa: E402
+from app.wire import drain  # noqa: E402,F401
 
 PROMPT = "The key to happiness is"
 
@@ -56,17 +57,6 @@ def decode_array(encoded: dict) -> list[float]:
                 cursor += 1
         return dense
     return values
-
-
-def drain(ws, wanted: str, limit: int = 4000) -> dict:
-    """Read events until one of `wanted` arrives."""
-    for _ in range(limit):
-        message = ws.receive_json()
-        if message["type"] == wanted:
-            return message
-        if message["type"] == "error" and wanted != "error":
-            raise AssertionError(f"server error: {message['payload']}")
-    raise AssertionError(f"never saw {wanted}")
 
 
 class TestModelEndpoint:
@@ -286,12 +276,9 @@ class TestHaltPayload:
             ws.send_json({"v": 1, "id": "2", "ts": 0, "type": "stop", "payload": {}})
         return session_id, payload
 
-    def test_stays_inside_the_25kb_budget(self, halted):
-        import json
-
-        _, payload = halted
-        size = len(json.dumps(payload).encode())
-        assert size < 25_000, f"halt payload is {size} bytes"
+    # The size budget moved to tests/test_payload_budget.py, which checks it as
+    # a function of sequence length rather than at one prompt length where it
+    # passes by a factor of forty.
 
     def test_head_summary_covers_every_layer_and_head(self, halted):
         _, payload = halted
@@ -414,7 +401,15 @@ class TestOnDemandTensors:
         assert len(body["entries"]) == 5
         probs = [e["prob"] for e in body["entries"]]
         assert probs == sorted(probs, reverse=True)
-        assert body["chosenTokenId"] == body["entries"][body["chosenRank"]]["tokenId"]
+
+        # The invariant the client actually relies on: it locates the emitted
+        # token by id, not by indexing with `chosenRank`. `chosenRank` is the
+        # token's rank in the whole distribution, which can exceed the length
+        # of a truncated list -- see TestTopKDepth.
+        ids = [e["tokenId"] for e in body["entries"]]
+        assert body["chosenTokenId"] in ids
+        assert body["entries"][0]["tokenId"] == body["chosenTokenId"]  # greedy
+        assert body["chosenRank"] == 0
 
     def test_full_logits_vector(self, client, ran):
         body = client.get(f"/api/sessions/{ran}/steps/0/logits", params={"k": 0}).json()

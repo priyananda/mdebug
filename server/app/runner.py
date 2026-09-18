@@ -69,6 +69,13 @@ class LayerCache:
         return total
 
 
+#: How many candidates the run *keeps* per step. Server-side memory only -- a
+#: few hundred bytes a step -- and it is the ceiling for `GET .../logits?k=`,
+#: which can only narrow this list. Distinct from `session.TOP_K`, which is how
+#: many are pushed to the client unasked.
+TOP_K_STORED = 50
+
+
 @dataclass
 class SampleResult:
     token_id: int
@@ -427,16 +434,29 @@ class DecodeRun:
                 scaled = scaled.masked_fill(scaled < cutoff, float("-inf"))
             probs = F.softmax(scaled, dim=-1)
 
-        k = min(50, probs.numel())
+        k = min(TOP_K_STORED, probs.numel())
         top = torch.topk(probs, k)
         top_ids = [int(i) for i in top.indices]
+        top_probs = [float(p) for p in top.values]
 
         if s.mode == "greedy":
             token_id = top_ids[0]
         else:
             token_id = int(torch.multinomial(probs, 1, generator=self._rng))
 
-        chosen_rank = top_ids.index(token_id) if token_id in top_ids else k
+        if token_id in top_ids:
+            chosen_rank = top_ids.index(token_id)
+        else:
+            # Sampling can land outside the stored list -- at temperature 2 and
+            # above it usually does. Keep the token anyway: showing where the
+            # emitted token sat in the distribution is the panel's whole job,
+            # and a list that omits it is the one case that must not happen.
+            # Its true rank is one comparison, so report that rather than a
+            # sentinel the client would have to special-case.
+            chosen_rank = int((probs > probs[token_id]).sum())
+            top_ids.append(token_id)
+            top_probs.append(float(probs[token_id]))
+
         nonzero = probs[probs > 0]
         entropy = float(-(nonzero * nonzero.log()).sum())
 
@@ -447,5 +467,5 @@ class DecodeRun:
             temperature=temperature,
             top_ids=top_ids,
             top_logits=[float(scores[i]) for i in top_ids],
-            top_probs=[float(p) for p in top.values],
+            top_probs=top_probs,
         )
