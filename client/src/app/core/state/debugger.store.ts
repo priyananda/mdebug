@@ -102,6 +102,9 @@ export class DebuggerStore {
     this._finishedText.set(null);
     this._generatedTokens.set([]);
     this._residualTrend.set([]);
+    // Otherwise the last run's sampling decision hangs around until this one
+    // reaches its first lm_head, and reads as though it belonged to step 0.
+    this._topK.set(null);
     this.api.send({ type: 'start', payload: { config: this.sessions.draft() } });
   }
 

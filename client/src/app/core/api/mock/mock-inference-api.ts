@@ -19,7 +19,6 @@ import {
   TopKLogits,
 } from '../../models/tensors.model';
 import { encodeArray } from '../../util/encoding';
-import { displayToken } from '../../util/format';
 import { ApiError } from '../api-errors';
 import { InferenceApi } from '../inference-api';
 import { ByteLevelBpeTokenizer, loadTokenizer } from './byte-bpe';
@@ -102,7 +101,7 @@ export class MockInferenceApi extends InferenceApi {
     return tok.encode(text).map((t, i) => ({
       id: t.id,
       text: t.text,
-      display: displayToken(t.text),
+      display: tok.display(t.text),
       position: i,
       isSpecial: tok.isSpecial(t.id),
       origin: 'prompt' as const,

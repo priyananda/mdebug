@@ -1,21 +1,11 @@
 import { Token } from '../models/session.model';
 
 /**
- * Token text is raw byte-level BPE output: leading spaces arrive as 'Ġ' and
- * newlines as 'Ċ'. Rendering those literally makes the token stream unreadable,
- * and rendering them as actual whitespace makes token boundaries invisible.
- * Both problems go away with visible substitutes.
+ * Token pieces back to the text they came from.
+ *
+ * Rendering a piece for a human is the tokenizer's job -- only it holds the
+ * byte alphabet -- so that lives on `ByteLevelBpeTokenizer.display`.
  */
-export function displayToken(text: string): string {
-  return text
-    .replace(/Ġ/g, '·') // Ġ — byte-level BPE's space
-    .replace(/Ċ/g, '⏎') // Ċ — newline
-    .replace(/ /g, '·')
-    .replace(/\n/g, '⏎')
-    .replace(/\t/g, '⇥');
-}
-
-/** Reverses displayToken for assembling readable output text. */
 export function detokenize(tokens: readonly Token[]): string {
   return tokens
     .map((t) => t.text.replace(/Ġ/g, ' ').replace(/Ċ/g, '\n'))

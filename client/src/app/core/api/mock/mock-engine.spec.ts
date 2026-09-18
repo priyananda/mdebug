@@ -6,7 +6,6 @@ import { ServerEvent } from '../../models/events.model';
 import { ModelInfo } from '../../models/model-info.model';
 import { DEFAULT_STAGE_DESCRIPTORS } from '../../models/pipeline.model';
 import { SessionConfig, SessionInfo } from '../../models/session.model';
-import { displayToken } from '../../util/format';
 import { ByteLevelBpeTokenizer } from './byte-bpe';
 import { MockEngine } from './mock-engine';
 
@@ -61,7 +60,7 @@ function makeEngine(config: Partial<SessionConfig> = {}, breakpoints: Breakpoint
     promptTokens: tokenizer.encode(full.prompt).map((t, i) => ({
       id: t.id,
       text: t.text,
-      display: displayToken(t.text),
+      display: tokenizer.display(t.text),
       position: i,
       isSpecial: false,
       origin: 'prompt' as const,

@@ -92,6 +92,37 @@ describe('ByteLevelBpeTokenizer', () => {
     expect(ids).not.toContain(tok.unkId);
   });
 
+  describe('display', () => {
+    // Must stay in step with `display_token` in server/app/runtime.py.
+    it('decodes multi-byte pieces back to real characters', () => {
+      // A curly quote is three characters in the byte alphabet.
+      expect(tok.display('\u0120\u00e2\u0122\u013e')).toBe('\u00b7\u201c');
+      expect(tok.display('\u00e2\u0122\u0136')).toBe('\u2014');
+    });
+
+    it('makes whitespace visible so token boundaries stay legible', () => {
+      expect(tok.display('\u0120key')).toBe('\u00b7key');
+      expect(tok.display('\u010a')).toBe('\u23ce');
+      expect(tok.display('The')).toBe('The');
+    });
+
+    it('shows a byte fragment as hex rather than a replacement character', () => {
+      // Byte 0xA1 cannot stand alone as UTF-8; which byte it is matters.
+      expect(tok.display('\u00a1')).toBe('\\xA1');
+    });
+
+    it('leaves special tokens alone', () => {
+      expect(tok.display('<s>')).toBe('<s>');
+      expect(tok.display('<unk>')).toBe('<unk>');
+    });
+
+    it('renders every vocabulary entry without throwing', () => {
+      for (let id = 0; id < tok.size; id++) {
+        expect(typeof tok.display(tok.tokenText(id))).toBe('string');
+      }
+    });
+  });
+
   it('treats the five reserved ids as special', () => {
     expect([0, 1, 2, 3, 4].every((id) => tok.isSpecial(id))).toBeTrue();
     expect(tok.isSpecial(5)).toBeFalse();

@@ -76,6 +76,12 @@
       </ul>
     </div>
   } @else {
-    <p class="empty">Run to a breakpoint to see the residual stream.</p>
+    <p class="empty">
+      @if (debug.status() === 'halted') {
+        No residual at this stage &mdash; halt on embed, a layer, or the final norm.
+      } @else {
+        Run to a breakpoint to see the residual stream.
+      }
+    </p>
   }
 </section>

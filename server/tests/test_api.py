@@ -104,6 +104,30 @@ class TestTokenize:
         assert [t["position"] for t in tokens] == [0, 1, 2, 3, 4]
 
 
+class TestTokenDisplay:
+    """`display` is the human-readable field; `text` stays the raw piece.
+
+    Must stay in step with `ByteLevelBpeTokenizer.display` in the client.
+    """
+
+    def test_decodes_multi_byte_pieces(self, client):
+        tokens = client.post("/api/tokenize", json={"text": '\u201cquiet\u201d \u2014 caf\u00e9'}).json()
+        displays = [t["display"] for t in tokens]
+        # The byte alphabet renders a curly quote as three characters; the
+        # display field must not leak that.
+        assert not any("\u00c3" in d or "\u00e2" in d for d in displays), displays
+        assert "".join(displays).replace("\u00b7", " ") == '\u201cquiet\u201d \u2014 caf\u00e9'
+
+    def test_keeps_the_raw_piece_in_text(self, client):
+        tokens = client.post("/api/tokenize", json={"text": "the key"}).json()
+        assert tokens[1]["text"].startswith("\u0120")
+        assert tokens[1]["display"].startswith("\u00b7")
+
+    def test_renders_whitespace_visibly(self, client):
+        tokens = client.post("/api/tokenize", json={"text": "a\nb"}).json()
+        assert any("\u23ce" in t["display"] for t in tokens)
+
+
 class TestSessionLifecycle:
     def test_create_get_list_delete(self, client):
         created = client.post("/api/sessions", json={"config": {"prompt": PROMPT, "maxNewTokens": 2}}).json()

@@ -18,7 +18,6 @@ import { HaltPayload, HaltPosition, HaltReason } from '../../models/run-state.mo
 import { SessionConfig, SessionInfo, Token } from '../../models/session.model';
 import { KvSnapshot, TopKEntry, TopKLogits } from '../../models/tensors.model';
 import { encodeArray } from '../../util/encoding';
-import { displayToken } from '../../util/format';
 import { ByteLevelBpeTokenizer } from './byte-bpe';
 import {
   attentionRow,
@@ -102,7 +101,7 @@ export class MockEngine {
     return this.tokenizer.encode(prompt).map((t, i) => ({
       id: t.id,
       text: t.text,
-      display: displayToken(t.text),
+      display: this.tokenizer.display(t.text),
       position: i,
       isSpecial: this.tokenizer.isSpecial(t.id),
       origin: 'prompt' as const,
@@ -375,7 +374,7 @@ export class MockEngine {
       case 'attention_max':
         return compare(c.op, this.attentionMax(step, stage.layer ?? 0, c.head), c.value);
       case 'emitted_token_text': {
-        const text = displayToken(this.tokenizer.tokenText(this.sampleFor(step).chosenTokenId));
+        const text = this.tokenizer.display(this.tokenizer.tokenText(this.sampleFor(step).chosenTokenId));
         return c.op === 'equals' ? text === c.value : text.includes(c.value);
       }
       case 'emitted_token_id':
@@ -508,7 +507,7 @@ export class MockEngine {
       return {
         tokenId: id,
         text,
-        display: displayToken(text),
+        display: this.tokenizer.display(text),
         logit: Math.log(Math.max(probs[i], 1e-12)) * Math.max(0.2, temperature || 0.2) + 6,
         prob: probs[i],
       };
@@ -556,7 +555,7 @@ export class MockEngine {
     const token: Token = {
       id: sample.chosenTokenId,
       text,
-      display: displayToken(text),
+      display: this.tokenizer.display(text),
       position: this.session.promptTokens.length + step,
       isSpecial: false,
       origin: 'generated',

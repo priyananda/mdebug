@@ -28,20 +28,47 @@ CHECKPOINT_PATH = _env_path("MDEBUG_CHECKPOINT", SERVER_ROOT / "checkpoints" / "
 TOKENIZER_DIR = _env_path("MDEBUG_TOKENIZER_DIR", SERVER_ROOT / "data" / "tokenizer")
 
 
-def display_token(text: str) -> str:
-    """Mirrors `displayToken` in the client.
+def _byte_decoder() -> dict[str, int]:
+    """Reverse of GPT-2's bytes_to_unicode table."""
+    printable = list(range(0x21, 0x7F)) + list(range(0xA1, 0xAD)) + list(range(0xAE, 0x100))
+    mapping = {b: b for b in printable}
+    spare = 0
+    for byte in range(256):
+        if byte not in mapping:
+            mapping[byte] = 256 + spare
+            spare += 1
+    return {chr(code): byte for byte, code in mapping.items()}
 
-    Byte-level BPE renders a leading space as U+0120 and a newline as U+010A.
-    Printing those literally is unreadable; printing real whitespace hides where
-    the tokenizer actually cut. Visible substitutes solve both.
+
+BYTE_DECODER = _byte_decoder()
+
+
+def display_token(text: str) -> str:
+    """The human-readable form of a token piece.
+
+    Byte-level BPE works in an alphabet where every byte is a printable
+    character, so any token holding a multi-byte character arrives looking like
+    mojibake -- a curly quote is the three characters U+00E2 U+0122 U+013E.
+    Mapping back through the byte table and decoding as UTF-8 restores it. A
+    token that is only part of a character decodes to U+FFFD, which is the
+    honest answer: it really is a fragment.
+
+    Whitespace then becomes visible glyphs, because rendering real spaces would
+    hide exactly where the tokenizer cut.
     """
-    return (
-        text.replace("Ġ", "·")
-        .replace("Ċ", "⏎")
-        .replace(" ", "·")
-        .replace("\n", "⏎")
-        .replace("\t", "⇥")
-    )
+    try:
+        raw = bytes(BYTE_DECODER[c] for c in text)
+    except KeyError:
+        # Not in the byte alphabet (a special token such as <s>): show as-is.
+        return text
+    try:
+        decoded = raw.decode("utf-8")
+    except UnicodeDecodeError:
+        # A token that is only part of a character. U+FFFD would hide which
+        # bytes those are; this audience reads hex, and the fragment is the
+        # interesting fact.
+        return "".join(f"\\x{b:02X}" for b in raw)
+    return decoded.replace(" ", "\u00b7").replace("\n", "\u23ce").replace("\t", "\u21e5")
 
 
 class Tokenizer:
