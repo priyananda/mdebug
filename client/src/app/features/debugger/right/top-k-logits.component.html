@@ -1,0 +1,57 @@
+<section class="panel">
+  <header class="panel__head">
+    <h2 class="panel__title">next token</h2>
+    @if (topK(); as t) {
+      @if (stale()) {
+        <span class="badge badge--warn" title="The current halt is past the sampling stage; this is the last decision taken.">
+          step {{ t.step }}
+        </span>
+      }
+      <span class="temp" title="Sampling temperature">
+        {{ t.temperature === 0 ? 'greedy' : 'T=' + fmt(t.temperature, 2) }}
+      </span>
+      <button type="button" class="chip" (click)="cycleScale()" title="Bar scale: linear, square root, log">
+        {{ scale() }}
+      </button>
+    }
+  </header>
+
+  @if (topK(); as t) {
+    @if (chosen(); as pick) {
+      <p class="pick">
+        chose <span class="pick__token">{{ pick.display }}</span>
+        <span class="pick__meta">
+          rank {{ t.chosenRank }} &middot; p={{ prob(pick.prob) }}
+        </span>
+      </p>
+    }
+
+    <div class="stats">
+      <span><span class="stat__key">entropy</span> {{ fmt(t.entropy, 2) }} nats</span>
+      @if (coverage(); as c) {
+        <span>
+          <span class="stat__key">{{ coveragePercent }}% mass in</span>
+          {{ c.count }} token{{ c.count === 1 ? '' : 's' }}
+        </span>
+      }
+      <span><span class="stat__key">showing</span> {{ t.k }}</span>
+    </div>
+
+    <ul class="rows">
+      @for (row of rows(); track row.tokenId) {
+        <li class="row" [class.is-chosen]="row.chosen">
+          <span class="row__rank">{{ row.rank }}</span>
+          <span class="row__token" [title]="'id ' + row.tokenId + ' · logit ' + fmt(row.logit, 3)">
+            {{ row.display }}
+          </span>
+          <span class="row__track">
+            <span class="row__fill" [style.width.%]="row.width"></span>
+          </span>
+          <span class="row__prob">{{ prob(row.prob) }}</span>
+        </li>
+      }
+    </ul>
+  } @else {
+    <p class="empty">Run to the LM head or sample stage to see the distribution.</p>
+  }
+</section>

@@ -1,5 +1,12 @@
-torch>=1.13.0
+# Inference engine (the vendored model in src/)
+torch>=2.0.0
 tokenizers>=0.13.2
+numpy>=1.24.0
+
+# Debugger backend
+fastapi>=0.110.0
+uvicorn[standard]>=0.27.0
+
+# Corpus preparation (extract_text.py) -- only needed to retrain
+pdfplumber>=0.7.6
 tqdm>=4.64.0
-#rotary-emb>=0.1.0          # for our RotaryEmbedding import
-pdfplumber>=0.7.6          # to extract text from PDF

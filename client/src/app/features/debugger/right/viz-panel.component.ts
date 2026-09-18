@@ -3,6 +3,7 @@ import { ChangeDetectionStrategy, Component } from '@angular/core';
 import { AttentionHeatmapComponent } from './attention-heatmap.component';
 import { KvCacheGridComponent } from './kv-cache-grid.component';
 import { ResidualStripComponent } from './residual-strip.component';
+import { TopKLogitsComponent } from './top-k-logits.component';
 
 /**
  * Hosts the visualizations, stacked rather than tabbed. Tabs would hide the
@@ -11,10 +12,16 @@ import { ResidualStripComponent } from './residual-strip.component';
  */
 @Component({
   selector: 'mdbg-viz-panel',
-  imports: [AttentionHeatmapComponent, KvCacheGridComponent, ResidualStripComponent],
+  imports: [
+    AttentionHeatmapComponent,
+    TopKLogitsComponent,
+    KvCacheGridComponent,
+    ResidualStripComponent,
+  ],
   template: `
     <div class="stack">
       <mdbg-attention-heatmap />
+      <mdbg-top-k-logits />
       <mdbg-kv-cache-grid />
       <mdbg-residual-strip />
     </div>

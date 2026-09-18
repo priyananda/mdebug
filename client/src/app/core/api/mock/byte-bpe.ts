@@ -150,6 +150,35 @@ export class ByteLevelBpeTokenizer {
     return this.decodePieces(ids.map((id) => this.tokenText(id)));
   }
 
+  /**
+   * The human-readable form of a token piece.
+   *
+   * The byte alphabet makes every byte printable, so a token holding a
+   * multi-byte character arrives looking like mojibake -- a curly quote is
+   * three characters. Mapping back through the byte table and decoding as UTF-8
+   * restores it; a token that is only part of a character cannot decode, and
+   * showing its bytes as hex says more than U+FFFD would.
+   *
+   * Must stay in step with `display_token` in server/app/runtime.py.
+   */
+  display(piece: string): string {
+    const bytes: number[] = [];
+    for (const ch of piece) {
+      const b = BYTE_DECODER.get(ch);
+      // Not in the byte alphabet (a special token such as <s>): show as-is.
+      if (b === undefined) return piece;
+      bytes.push(b);
+    }
+    const raw = new Uint8Array(bytes);
+    let decoded: string;
+    try {
+      decoded = new TextDecoder('utf-8', { fatal: true }).decode(raw);
+    } catch {
+      return bytes.map((b) => '\\x' + b.toString(16).toUpperCase().padStart(2, '0')).join('');
+    }
+    return decoded.replace(/ /g, '\u00b7').replace(/\n/g, '\u23ce').replace(/\t/g, '\u21e5');
+  }
+
   /** True for the five reserved tokens, which should never be sampled. */
   isSpecial(id: number): boolean {
     return id <= 4;

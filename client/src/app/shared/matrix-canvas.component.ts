@@ -83,7 +83,11 @@ export class MatrixCanvasComponent {
   readonly hovered = output<CellHover | null>();
   readonly picked = output<CellHover>();
 
-  private readonly canvasRef = viewChild.required<ElementRef<HTMLCanvasElement>>('canvas');
+  // Not `viewChild.required`: the repaint effect can run before the view is
+  // initialised or while it is being torn down, and a required query throws
+  // there. A thrown effect is never retried, so the canvas would stay blank
+  // for good -- a permanent failure from a transient condition.
+  private readonly canvasRef = viewChild<ElementRef<HTMLCanvasElement>>('canvas');
   private readonly host = inject(ElementRef<HTMLElement>);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -124,7 +128,8 @@ export class MatrixCanvasComponent {
   }
 
   private draw(): void {
-    const canvas = this.canvasRef().nativeElement;
+    const canvas = this.canvasRef()?.nativeElement;
+    if (!canvas) return;
     const { width } = this.size();
     const height = this.drawHeight();
     if (width <= 0) return;
@@ -183,7 +188,9 @@ export class MatrixCanvasComponent {
     const height = this.drawHeight();
     if (!values || rows <= 0 || cols <= 0 || width <= 0) return null;
 
-    const rect = this.canvasRef().nativeElement.getBoundingClientRect();
+    const element = this.canvasRef()?.nativeElement;
+    if (!element) return null;
+    const rect = element.getBoundingClientRect();
     const x = event.clientX - rect.left;
     const y = event.clientY - rect.top;
     const col = Math.floor((x / width) * cols);

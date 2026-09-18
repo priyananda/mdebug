@@ -1,0 +1,82 @@
+:host { display: block; min-width: 0; }
+
+.temp {
+  font-size: var(--fs-xs);
+  color: var(--ink-muted);
+}
+
+.pick {
+  font-size: var(--fs-sm);
+  color: var(--ink-muted);
+}
+
+.pick__token {
+  padding: 0 3px;
+  background: var(--ok-bg);
+  border: 1px solid var(--ok);
+  border-radius: 2px;
+  color: var(--ink);
+  white-space: pre;
+}
+
+.pick__meta {
+  margin-left: var(--s-1);
+  font-size: var(--fs-xs);
+  color: var(--ink-faint);
+}
+
+.rows {
+  display: grid;
+  gap: 1px;
+  max-height: 150px;
+  overflow-y: auto;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 2ch 9ch minmax(0, 1fr) 5ch;
+  align-items: center;
+  gap: var(--s-1);
+  font-size: var(--fs-xs);
+  padding: 0 1px;
+  border-radius: 2px;
+}
+
+/* The sampled token is not always rank 0 once temperature is in play, which is
+   exactly the thing worth being able to see at a glance. */
+.row.is-chosen {
+  background: var(--ok-bg);
+  outline: 1px solid var(--ok);
+}
+
+.row__rank {
+  color: var(--ink-faint);
+  text-align: right;
+}
+
+.row__token {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: pre;
+  color: var(--ink);
+}
+
+.row__track {
+  height: 8px;
+  background: var(--bg-raised);
+  border-radius: 1px;
+  overflow: hidden;
+}
+
+.row__fill {
+  display: block;
+  height: 100%;
+  background: var(--data);
+}
+
+.row.is-chosen .row__fill { background: var(--ok); }
+
+.row__prob {
+  text-align: right;
+  color: var(--ink-faint);
+}

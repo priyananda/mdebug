@@ -4,8 +4,20 @@
     {
       "name": "client",
       "runtimeExecutable": "npm",
-      "runtimeArgs": ["start", "--prefix", "client"],
+      "runtimeArgs": [
+        "start",
+        "--prefix",
+        "client"
+      ],
       "port": 4200
+    },
+    {
+      "name": "server",
+      "runtimeExecutable": "server/.venv/bin/python",
+      "runtimeArgs": [
+        "server/run.py"
+      ],
+      "port": 8000
     }
   ]
 }
