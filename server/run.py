@@ -4,6 +4,8 @@
     MDEBUG_PORT=9000 python run.py
 
 The client expects this at `environment.apiBase`. See docs/api-contract.md.
+
+In a container, MDEBUG_HOST=0.0.0.0 and Cloud Run's injected PORT take over.
 """
 
 import os
@@ -18,11 +20,19 @@ HERE = Path(__file__).resolve().parent
 os.chdir(HERE)
 sys.path.insert(0, str(HERE))
 
+
+def _flag(name: str) -> bool:
+    """`MDEBUG_RELOAD=0` should mean off, which bool() of the string does not."""
+    return os.environ.get(name, "").strip().lower() not in ("", "0", "false", "no", "off")
+
+
 if __name__ == "__main__":
+    # Cloud Run injects PORT. MDEBUG_PORT stays the local knob and wins if set.
+    port = int(os.environ.get("MDEBUG_PORT") or os.environ.get("PORT") or 8000)
     uvicorn.run(
         "app.main:app",
         host=os.environ.get("MDEBUG_HOST", "127.0.0.1"),
-        port=int(os.environ.get("MDEBUG_PORT", 8000)),
-        reload=bool(os.environ.get("MDEBUG_RELOAD")),
+        port=port,
+        reload=_flag("MDEBUG_RELOAD"),
         log_level=os.environ.get("MDEBUG_LOG_LEVEL", "info"),
     )

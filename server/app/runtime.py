@@ -24,6 +24,10 @@ def _env_path(name: str, default: Path) -> Path:
     return Path(raw) if raw else default
 
 
+def _env_flag(name: str) -> bool:
+    return os.environ.get(name, "").strip().lower() not in ("", "0", "false", "no", "off")
+
+
 CHECKPOINT_PATH = _env_path("MDEBUG_CHECKPOINT", SERVER_ROOT / "checkpoints" / "ckpt_5000.pt")
 TOKENIZER_DIR = _env_path("MDEBUG_TOKENIZER_DIR", SERVER_ROOT / "data" / "tokenizer")
 
@@ -203,6 +207,18 @@ def get_runtime() -> Runtime:
     from src.config import config
     from src.model import QwenModel
 
+    # torch sizes its pools from the host's core count, not the container's CPU
+    # limit, which oversubscribes a small Cloud Run instance. OMP_NUM_THREADS in
+    # the image covers the OpenMP runtime, which is initialised before we get
+    # here; this covers torch's own intra/inter-op pools.
+    threads = os.environ.get("MDEBUG_TORCH_THREADS")
+    if threads:
+        torch.set_num_threads(int(threads))
+        try:
+            torch.set_num_interop_threads(int(threads))
+        except RuntimeError:
+            pass  # already started; only settable before the first parallel op
+
     tokenizer = Tokenizer(TOKENIZER_DIR)
 
     model = QwenModel(config)
@@ -216,6 +232,13 @@ def get_runtime() -> Runtime:
     else:
         # Refusing to start would make the API impossible to develop against
         # without a 978 MB file, but silently serving noise would be worse.
+        # A deployment sets MDEBUG_REQUIRE_CHECKPOINT so that a missing file
+        # fails the revision instead of promoting a service that answers
+        # 200 OK from /api/health while generating garbage.
+        if _env_flag("MDEBUG_REQUIRE_CHECKPOINT"):
+            raise RuntimeError(
+                f"MDEBUG_REQUIRE_CHECKPOINT is set but there is no checkpoint at {CHECKPOINT_PATH}"
+            )
         print(
             f"WARNING: no checkpoint at {CHECKPOINT_PATH}; serving randomly initialised weights",
             flush=True,
