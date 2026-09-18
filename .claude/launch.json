@@ -18,6 +18,20 @@
         "server/run.py"
       ],
       "port": 8000
+    },
+    {
+      "name": "client-prod",
+      "runtimeExecutable": "npx",
+      "runtimeArgs": [
+        "ng",
+        "serve",
+        "--configuration=production",
+        "--port",
+        "4200"
+      ],
+      "cwd": "client",
+      "port": 4200,
+      "autoPort": false
     }
   ]
 }
