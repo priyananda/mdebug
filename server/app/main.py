@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import asyncio
 import os
+from concurrent.futures import ThreadPoolExecutor
 from contextlib import asynccontextmanager
 from typing import Any
 
@@ -46,9 +47,20 @@ def _origins() -> list[str]:
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
+    loop = asyncio.get_running_loop()
+
+    # The default executor is sized min(32, cpu + 4), so on a two-core instance
+    # several sessions can each run a forward pass at once and thrash. Bounding
+    # it serialises inference, which is faster in aggregate than oversubscribing.
+    workers = int(os.environ.get("MDEBUG_EXECUTOR_WORKERS", "0"))
+    if workers:
+        loop.set_default_executor(
+            ThreadPoolExecutor(max_workers=workers, thread_name_prefix="mdebug")
+        )
+
     # Load the checkpoint at startup rather than on the first request, so the
     # first session does not pay for it.
-    await asyncio.get_running_loop().run_in_executor(None, get_runtime)
+    await loop.run_in_executor(None, get_runtime)
     yield
     await registry.shutdown()
 

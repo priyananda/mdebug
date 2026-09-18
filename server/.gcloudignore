@@ -1,0 +1,35 @@
+# What `gcloud builds submit server/` uploads to Cloud Build.
+#
+# This file is mandatory, not a nicety: gcloud only auto-generates an ignore
+# list when .git or .gitignore lives in the submitted directory, and server/
+# has neither (the repo's .gitignore is one level up). Without it the upload is
+# the whole 2.0 GB tree -- .venv alone is 1.1 GB. A .dockerignore does NOT
+# filter the upload; it only applies once the context has already been sent.
+
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# The unstripped 978 MB checkpoint. scripts/strip_checkpoint.py produces the
+# weights-only file below, which is what the image actually needs.
+checkpoints/*
+!checkpoints/ckpt_5000.weights.pt
+
+# Copyrighted corpus; the derived tokenizer is what ships.
+data/book.pdf
+data/book.txt
+
+# Training and retraining only -- not part of the served surface. infer.py is
+# excluded deliberately: it imports transformers, which is in no requirements
+# file, so shipping it would put a guaranteed-broken module in the image.
+train.py
+train_tokenizer.py
+extract_text.py
+test_tokenizer.py
+infer.py
+tests/
+inference/
+requirements-dev.txt
+README.md
+.dockerignore

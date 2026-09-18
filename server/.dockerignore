@@ -1,0 +1,38 @@
+# What the Docker daemon sees inside an already-uploaded build context.
+#
+# Not redundant with .gcloudignore -- the two govern different stages. That
+# file decides what leaves this machine; this one decides what the daemon can
+# see, and keeps a future local `docker build` behaving like a Cloud Build.
+# The Dockerfile COPYs explicit paths rather than `COPY . .`, so this is
+# defence-in-depth. Do not delete either one as a duplicate of the other.
+
+.venv/
+.pytest_cache/
+__pycache__/
+*.py[cod]
+
+# The unstripped 978 MB checkpoint. scripts/strip_checkpoint.py produces the
+# weights-only file below, which is what the image actually needs.
+checkpoints/*
+!checkpoints/ckpt_5000.weights.pt
+
+# Copyrighted corpus; the derived tokenizer is what ships.
+data/book.pdf
+data/book.txt
+
+# Training and retraining only -- not part of the served surface. infer.py is
+# excluded deliberately: it imports transformers, which is in no requirements
+# file, so shipping it would put a guaranteed-broken module in the image.
+train.py
+train_tokenizer.py
+extract_text.py
+test_tokenizer.py
+infer.py
+tests/
+inference/
+requirements-dev.txt
+README.md
+
+.gcloudignore
+.dockerignore
+Dockerfile

@@ -1,0 +1,13 @@
+# Serving only -- what the container installs. requirements.txt stays the
+# training surface, so pdfplumber and tqdm are deliberately absent here.
+#
+# torch is NOT listed: the Dockerfile installs it from the CPU wheel index.
+# The default PyPI linux wheel is the CUDA build (~900 MB plus nvidia-*
+# transitive wheels) and this server never touches a GPU -- runner.py:195
+# hardcodes torch.device("cpu") and runtime.py loads with map_location="cpu".
+#
+# Pinned to the versions the local .venv is tested against.
+tokenizers==0.23.2
+numpy==2.5.3
+fastapi==0.141.1
+uvicorn[standard]==0.53.0
