@@ -225,6 +225,27 @@ fires them on hover and selection changes and cancels in-flight ones. A
 completed step's tensors never change, so they should carry
 `Cache-Control: public, max-age=31536000, immutable`.
 
+### Responses are gzipped
+
+`GZipMiddleware`, `minimum_size=500`. Every response here is JSON, and mostly
+base64 of quantised tensors, so this is the single largest reduction available
+on the HTTP channel — measured on the at-cap benchmark profile it takes a
+session's HTTP traffic from **177.8 kB to 10.1 kB, a 94 % saving**.
+
+Three consequences worth knowing:
+
+- Responses carry `Vary: Accept-Encoding`, which they must, or a shared cache
+  can hand a gzipped body to a client that did not ask for one — and the tensor
+  `GET`s above are explicitly cacheable.
+- A client sending `Accept-Encoding: identity` still gets plain JSON. Nothing in
+  the contract requires the client to support gzip; browsers all do.
+- The WebSocket is deliberately **not** covered. `GZipMiddleware` ignores
+  non-HTTP scopes, and uvicorn already negotiates permessage-deflate there.
+  Compressing it twice would cost CPU and save nothing. See §7.
+
+Requests are not compressed in either direction; the client does not gzip
+uploads, and the only large one is a long prompt.
+
 A request for a session the server no longer has must return **404** with
 `{"code": "session_not_found"}`. The client has a specific recovery path for
 this (offer a fresh session) and must not be left retrying.
@@ -344,7 +365,8 @@ def encode_attention(w: torch.Tensor) -> dict:   # w: [T, T], rows sum to 1
 
 ## 7. Halt payload
 
-Sent eagerly with every `halted` event. **Budget: under 25 kB.**
+Sent eagerly with every `halted` event. **Budget: under 25 kB — and at the
+configured limits this budget is currently breached. See below.**
 
 ```ts
 interface HaltPayload {
@@ -370,6 +392,72 @@ over all rows: the current row is the one that matters at a halt, and it costs
 It is what colours the per-head density marks in the pipeline graph, turning the
 layer ladder into a live 20×8 view of head behaviour. At 640 bytes, send it on
 every halt.
+
+### The 25 kB budget, as measured
+
+Measured by `server/bench/session_bytes.py`; reproduce with
+`.venv/bin/python -m bench.session_bytes`.
+
+| halt | T | payload |
+|---|---|---|
+| short prompt (5 tokens), `L5.attention` | 5 | 5.8 kB |
+| first halt of the at-cap profile, `L5.attention` | 128 | **35.8 kB** |
+| `emit` near the ceiling | 191 | **49.4 kB** |
+
+The budget holds comfortably at short sequence lengths and fails at long ones,
+because `kv.occupancy` and `kv.keyNorms` together cost **133 bytes per token of
+T** and are rebuilt from scratch at every halt. Everything else in the payload
+is constant: residual 2 732 B, `headSummary` 856 B, `topK` ~1.0 kB where it
+appears, and a few hundred bytes of envelope and position.
+
+So a halt exceeds 25 kB above roughly **T ≈ 150**, or **T ≈ 145** at
+`lm_head`/`sample`/`emit`, which also carry `topK`. The first halt of a run
+additionally carries `promptTokens` at ~106 B per token. With `maxTotalTokens`
+at 192, all of those are inside the supported range.
+
+This is recorded rather than quietly rounded off, for the same reason
+`simulated` may not lie: the document is only useful if its numbers are
+measurements. `server/tests/test_payload_budget.py` asserts the breach, so
+fixing it fails a test and forces this section to be updated.
+
+**What the raw size does *not* tell you** is the cost on the wire. `run.py`
+leaves uvicorn's `ws_per_message_deflate` at its default, and the `websockets`
+server negotiates context takeover, so the socket carries a compression
+dictionary across messages. The KV grid is identical at every halt within a
+decode step, so its *marginal* deflated cost is a few hundred bytes for a whole
+session, while the residual — high-entropy f32 that genuinely changes every
+halt — barely compresses at all. Ranking these fields by their raw share gets
+the optimization order wrong. `server/app/metering.py` explains the three
+columns the benchmark reports; use the right one.
+
+### `topK` depth: pushed versus stored
+
+Two different numbers, and conflating them is how the eager payload grows back:
+
+| constant | value | meaning |
+|---|---|---|
+| `session.TOP_K` | 12 | how many candidates ride along in `halted` and `token_emitted` |
+| `runner.TOP_K_STORED` | 50 | how many the run keeps, so `GET …/logits?k=` can widen |
+
+Twelve is a measurement, not a taste. This model puts **~98.3 % of the
+probability mass on the top-1 token**, and ranks 2–50 share the remaining
+0.7 % between them, so the tail was costing bytes on every emitted token to
+show nothing. Twelve still covers ~98.7 % and leaves eleven visible
+alternatives. Cutting 50 → 12 took `token_emitted` on the at-cap profile from
+266.5 kB to 79.2 kB of payload, and from 41.6 kB to 13.3 kB on the wire.
+
+The larger list stays server-side, so depth is still reachable on demand:
+`?k=50` returns fifty, `?k=0` still returns the whole f32 vocabulary. This is
+rule 1 again — eager payloads are bounded, depth is fetched.
+
+**The emitted token is always present in `entries`, at any `k`.** If sampling
+lands outside the top-`k` the server appends it rather than dropping it, and
+`chosenRank` reports its true rank in the full distribution. This matters more
+than it sounds: above temperature ≈ 2 the sampled token usually falls outside
+even the stored 50, and a panel that cannot show where the emitted token sat
+has lost the one row it exists for. Clients must therefore locate it by
+`chosenTokenId`, **not** by indexing `entries` with `chosenRank`, which may
+exceed the list length. `entries` stays sorted by descending probability.
 
 ### KV snapshot, and the honesty requirement
 

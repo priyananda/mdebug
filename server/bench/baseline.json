@@ -1,0 +1,996 @@
+{
+  "at-cap": {
+    "attentionTiles": 5,
+    "haltBreakdown": {
+      "fields": [
+        {
+          "field": "kv.keyNorms",
+          "marginalDeflate": 17725,
+          "raw": 124476
+        },
+        {
+          "field": "kv.occupancy",
+          "marginalDeflate": 415,
+          "raw": 32076
+        },
+        {
+          "field": "residual",
+          "marginalDeflate": 17074,
+          "raw": 22928
+        },
+        {
+          "field": "sequence",
+          "marginalDeflate": 825,
+          "raw": 13737
+        },
+        {
+          "field": "headSummary",
+          "marginalDeflate": 645,
+          "raw": 8946
+        },
+        {
+          "field": "residualStats",
+          "marginalDeflate": 668,
+          "raw": 1140
+        },
+        {
+          "field": "position",
+          "marginalDeflate": 296,
+          "raw": 1126
+        },
+        {
+          "field": "topK",
+          "marginalDeflate": 414,
+          "raw": 1060
+        },
+        {
+          "field": "envelope + other",
+          "marginalDeflate": 0,
+          "raw": 529
+        },
+        {
+          "field": "timings",
+          "marginalDeflate": 161,
+          "raw": 401
+        }
+      ],
+      "largestRaw": 34069,
+      "messages": 9,
+      "totalDeflate": 38058,
+      "totalRaw": 206419
+    },
+    "halts": 9,
+    "maxNewTokens": 64,
+    "meter": {
+      "rows": [
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 37211,
+          "direction": "out",
+          "gzip": 82176,
+          "label": "halted",
+          "raw": 206419
+        },
+        {
+          "channel": "ws",
+          "count": 64,
+          "deflate": 13597,
+          "direction": "out",
+          "gzip": 33415,
+          "label": "token_emitted",
+          "raw": 81134
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 3722,
+          "direction": "out",
+          "gzip": 3732,
+          "label": "session_state",
+          "raw": 64377
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 3449,
+          "direction": "out",
+          "gzip": 3599,
+          "label": "POST /api/sessions",
+          "raw": 64124
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1884,
+          "direction": "out",
+          "gzip": 1929,
+          "label": "POST /api/tokenize",
+          "raw": 58176
+        },
+        {
+          "channel": "http",
+          "count": 5,
+          "deflate": 1811,
+          "direction": "out",
+          "gzip": 3400,
+          "label": "GET /api/sessions/{session_id}/steps/{step}/attention",
+          "raw": 56867
+        },
+        {
+          "channel": "ws",
+          "count": 217,
+          "deflate": 11182,
+          "direction": "out",
+          "gzip": 31788,
+          "label": "stage_entered",
+          "raw": 33682
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 91,
+          "direction": "in",
+          "gzip": 124,
+          "label": "POST /api/sessions",
+          "raw": 2946
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 65,
+          "direction": "in",
+          "gzip": 79,
+          "label": "POST /api/tokenize",
+          "raw": 2891
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1225,
+          "direction": "out",
+          "gzip": 1239,
+          "label": "GET /api/model",
+          "raw": 2741
+        },
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 607,
+          "direction": "out",
+          "gzip": 1585,
+          "label": "resumed",
+          "raw": 1945
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 118,
+          "direction": "out",
+          "gzip": 169,
+          "label": "finished",
+          "raw": 946
+        },
+        {
+          "channel": "ws",
+          "count": 6,
+          "deflate": 87,
+          "direction": "in",
+          "gzip": 440,
+          "label": "step",
+          "raw": 360
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 107,
+          "direction": "in",
+          "gzip": 123,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 171
+        },
+        {
+          "channel": "ws",
+          "count": 3,
+          "deflate": 46,
+          "direction": "in",
+          "gzip": 207,
+          "label": "continue",
+          "raw": 165
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 81,
+          "direction": "out",
+          "gzip": 108,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 155
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 74,
+          "direction": "out",
+          "gzip": 125,
+          "label": "breakpoints_changed",
+          "raw": 124
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 96,
+          "direction": "out",
+          "gzip": 115,
+          "label": "run_started",
+          "raw": 108
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 35,
+          "direction": "in",
+          "gzip": 83,
+          "label": "set_breakpoints",
+          "raw": 78
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 52,
+          "direction": "in",
+          "gzip": 66,
+          "label": "start",
+          "raw": 51
+        }
+      ],
+      "totals": {
+        "http/in": {
+          "count": 3,
+          "deflate": 263,
+          "gzip": 326,
+          "raw": 6008
+        },
+        "http/out": {
+          "count": 9,
+          "deflate": 8450,
+          "gzip": 10275,
+          "raw": 182063
+        },
+        "total": {
+          "count": 326,
+          "deflate": 75540,
+          "gzip": 164502,
+          "raw": 577460
+        },
+        "ws/in": {
+          "count": 11,
+          "deflate": 220,
+          "gzip": 796,
+          "raw": 654
+        },
+        "ws/out": {
+          "count": 303,
+          "deflate": 66607,
+          "gzip": 153105,
+          "raw": 388735
+        }
+      }
+    },
+    "profile": "at-cap",
+    "promptTokens": 128,
+    "wire": {
+      "rows": [
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 37211,
+          "direction": "out",
+          "gzip": 82176,
+          "label": "halted",
+          "raw": 206419
+        },
+        {
+          "channel": "ws",
+          "count": 64,
+          "deflate": 13597,
+          "direction": "out",
+          "gzip": 33415,
+          "label": "token_emitted",
+          "raw": 81134
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 3722,
+          "direction": "out",
+          "gzip": 3732,
+          "label": "session_state",
+          "raw": 64377
+        },
+        {
+          "channel": "ws",
+          "count": 217,
+          "deflate": 11182,
+          "direction": "out",
+          "gzip": 31788,
+          "label": "stage_entered",
+          "raw": 33682
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 2963,
+          "direction": "out",
+          "gzip": 2979,
+          "label": "POST /api/sessions",
+          "raw": 3601
+        },
+        {
+          "channel": "http",
+          "count": 5,
+          "deflate": 3457,
+          "direction": "out",
+          "gzip": 3522,
+          "label": "GET /api/sessions/{session_id}/steps/{step}/attention",
+          "raw": 3407
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 91,
+          "direction": "in",
+          "gzip": 124,
+          "label": "POST /api/sessions",
+          "raw": 2946
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 65,
+          "direction": "in",
+          "gzip": 79,
+          "label": "POST /api/tokenize",
+          "raw": 2891
+        },
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 607,
+          "direction": "out",
+          "gzip": 1585,
+          "label": "resumed",
+          "raw": 1945
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1400,
+          "direction": "out",
+          "gzip": 1415,
+          "label": "POST /api/tokenize",
+          "raw": 1927
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1249,
+          "direction": "out",
+          "gzip": 1262,
+          "label": "GET /api/model",
+          "raw": 1239
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 118,
+          "direction": "out",
+          "gzip": 169,
+          "label": "finished",
+          "raw": 946
+        },
+        {
+          "channel": "ws",
+          "count": 6,
+          "deflate": 87,
+          "direction": "in",
+          "gzip": 440,
+          "label": "step",
+          "raw": 360
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 107,
+          "direction": "in",
+          "gzip": 123,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 171
+        },
+        {
+          "channel": "ws",
+          "count": 3,
+          "deflate": 46,
+          "direction": "in",
+          "gzip": 207,
+          "label": "continue",
+          "raw": 165
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 94,
+          "direction": "out",
+          "gzip": 108,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 155
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 74,
+          "direction": "out",
+          "gzip": 125,
+          "label": "breakpoints_changed",
+          "raw": 124
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 96,
+          "direction": "out",
+          "gzip": 115,
+          "label": "run_started",
+          "raw": 108
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 35,
+          "direction": "in",
+          "gzip": 83,
+          "label": "set_breakpoints",
+          "raw": 78
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 52,
+          "direction": "in",
+          "gzip": 66,
+          "label": "start",
+          "raw": 51
+        }
+      ],
+      "totals": {
+        "http/in": {
+          "count": 3,
+          "deflate": 263,
+          "gzip": 326,
+          "raw": 6008
+        },
+        "http/out": {
+          "count": 9,
+          "deflate": 9163,
+          "gzip": 9286,
+          "raw": 10329
+        },
+        "total": {
+          "count": 326,
+          "deflate": 76253,
+          "gzip": 163513,
+          "raw": 405726
+        },
+        "ws/in": {
+          "count": 11,
+          "deflate": 220,
+          "gzip": 796,
+          "raw": 654
+        },
+        "ws/out": {
+          "count": 303,
+          "deflate": 66607,
+          "gzip": 153105,
+          "raw": 388735
+        }
+      }
+    }
+  },
+  "typical": {
+    "attentionTiles": 5,
+    "haltBreakdown": {
+      "fields": [
+        {
+          "field": "residual",
+          "marginalDeflate": 16762,
+          "raw": 22928
+        },
+        {
+          "field": "headSummary",
+          "marginalDeflate": 731,
+          "raw": 8946
+        },
+        {
+          "field": "kv.keyNorms",
+          "marginalDeflate": 857,
+          "raw": 6378
+        },
+        {
+          "field": "kv.occupancy",
+          "marginalDeflate": 87,
+          "raw": 2538
+        },
+        {
+          "field": "envelope + other",
+          "marginalDeflate": 0,
+          "raw": 1482
+        },
+        {
+          "field": "residualStats",
+          "marginalDeflate": 635,
+          "raw": 1146
+        },
+        {
+          "field": "position",
+          "marginalDeflate": 165,
+          "raw": 1108
+        },
+        {
+          "field": "topK",
+          "marginalDeflate": 360,
+          "raw": 1061
+        },
+        {
+          "field": "sequence",
+          "marginalDeflate": 163,
+          "raw": 927
+        },
+        {
+          "field": "timings",
+          "marginalDeflate": 136,
+          "raw": 388
+        }
+      ],
+      "largestRaw": 5834,
+      "messages": 9,
+      "totalDeflate": 20471,
+      "totalRaw": 46902
+    },
+    "halts": 9,
+    "maxNewTokens": 4,
+    "meter": {
+      "rows": [
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 19858,
+          "direction": "out",
+          "gzip": 27155,
+          "label": "halted",
+          "raw": 46902
+        },
+        {
+          "channel": "ws",
+          "count": 4,
+          "deflate": 1042,
+          "direction": "out",
+          "gzip": 2104,
+          "label": "token_emitted",
+          "raw": 5058
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 1629,
+          "direction": "out",
+          "gzip": 1643,
+          "label": "session_state",
+          "raw": 3815
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 223,
+          "direction": "out",
+          "gzip": 1526,
+          "label": "POST /api/sessions",
+          "raw": 3562
+        },
+        {
+          "channel": "ws",
+          "count": 19,
+          "deflate": 999,
+          "direction": "out",
+          "gzip": 2757,
+          "label": "stage_entered",
+          "raw": 2889
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1225,
+          "direction": "out",
+          "gzip": 1239,
+          "label": "GET /api/model",
+          "raw": 2741
+        },
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 486,
+          "direction": "out",
+          "gzip": 1576,
+          "label": "resumed",
+          "raw": 1927
+        },
+        {
+          "channel": "http",
+          "count": 5,
+          "deflate": 371,
+          "direction": "out",
+          "gzip": 1285,
+          "label": "GET /api/sessions/{session_id}/steps/{step}/attention",
+          "raw": 1571
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 146,
+          "direction": "out",
+          "gzip": 176,
+          "label": "POST /api/tokenize",
+          "raw": 472
+        },
+        {
+          "channel": "ws",
+          "count": 6,
+          "deflate": 87,
+          "direction": "in",
+          "gzip": 440,
+          "label": "step",
+          "raw": 360
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 104,
+          "direction": "out",
+          "gzip": 157,
+          "label": "finished",
+          "raw": 178
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 106,
+          "direction": "in",
+          "gzip": 123,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 171
+        },
+        {
+          "channel": "ws",
+          "count": 3,
+          "deflate": 46,
+          "direction": "in",
+          "gzip": 207,
+          "label": "continue",
+          "raw": 165
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 64,
+          "direction": "out",
+          "gzip": 108,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 155
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 66,
+          "direction": "out",
+          "gzip": 125,
+          "label": "breakpoints_changed",
+          "raw": 124
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 64,
+          "direction": "out",
+          "gzip": 115,
+          "label": "run_started",
+          "raw": 108
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 67,
+          "direction": "in",
+          "gzip": 102,
+          "label": "POST /api/sessions",
+          "raw": 88
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 35,
+          "direction": "in",
+          "gzip": 83,
+          "label": "set_breakpoints",
+          "raw": 78
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 52,
+          "direction": "in",
+          "gzip": 66,
+          "label": "start",
+          "raw": 51
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 40,
+          "direction": "in",
+          "gzip": 54,
+          "label": "POST /api/tokenize",
+          "raw": 34
+        }
+      ],
+      "totals": {
+        "http/in": {
+          "count": 3,
+          "deflate": 213,
+          "gzip": 279,
+          "raw": 293
+        },
+        "http/out": {
+          "count": 9,
+          "deflate": 2029,
+          "gzip": 4334,
+          "raw": 8501
+        },
+        "total": {
+          "count": 68,
+          "deflate": 26710,
+          "gzip": 41041,
+          "raw": 70449
+        },
+        "ws/in": {
+          "count": 11,
+          "deflate": 220,
+          "gzip": 796,
+          "raw": 654
+        },
+        "ws/out": {
+          "count": 45,
+          "deflate": 24248,
+          "gzip": 35632,
+          "raw": 61001
+        }
+      }
+    },
+    "profile": "typical",
+    "promptTokens": 5,
+    "wire": {
+      "rows": [
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 19858,
+          "direction": "out",
+          "gzip": 27155,
+          "label": "halted",
+          "raw": 46902
+        },
+        {
+          "channel": "ws",
+          "count": 4,
+          "deflate": 1042,
+          "direction": "out",
+          "gzip": 2104,
+          "label": "token_emitted",
+          "raw": 5058
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 1629,
+          "direction": "out",
+          "gzip": 1643,
+          "label": "session_state",
+          "raw": 3815
+        },
+        {
+          "channel": "ws",
+          "count": 19,
+          "deflate": 999,
+          "direction": "out",
+          "gzip": 2757,
+          "label": "stage_entered",
+          "raw": 2889
+        },
+        {
+          "channel": "ws",
+          "count": 9,
+          "deflate": 486,
+          "direction": "out",
+          "gzip": 1576,
+          "label": "resumed",
+          "raw": 1927
+        },
+        {
+          "channel": "http",
+          "count": 5,
+          "deflate": 390,
+          "direction": "out",
+          "gzip": 1285,
+          "label": "GET /api/sessions/{session_id}/steps/{step}/attention",
+          "raw": 1571
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1536,
+          "direction": "out",
+          "gzip": 1549,
+          "label": "POST /api/sessions",
+          "raw": 1526
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 1249,
+          "direction": "out",
+          "gzip": 1262,
+          "label": "GET /api/model",
+          "raw": 1239
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 162,
+          "direction": "out",
+          "gzip": 176,
+          "label": "POST /api/tokenize",
+          "raw": 472
+        },
+        {
+          "channel": "ws",
+          "count": 6,
+          "deflate": 87,
+          "direction": "in",
+          "gzip": 440,
+          "label": "step",
+          "raw": 360
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 104,
+          "direction": "out",
+          "gzip": 157,
+          "label": "finished",
+          "raw": 178
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 106,
+          "direction": "in",
+          "gzip": 123,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 171
+        },
+        {
+          "channel": "ws",
+          "count": 3,
+          "deflate": 46,
+          "direction": "in",
+          "gzip": 207,
+          "label": "continue",
+          "raw": 165
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 82,
+          "direction": "out",
+          "gzip": 108,
+          "label": "PUT /api/sessions/{session_id}/breakpoints",
+          "raw": 155
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 66,
+          "direction": "out",
+          "gzip": 125,
+          "label": "breakpoints_changed",
+          "raw": 124
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 64,
+          "direction": "out",
+          "gzip": 115,
+          "label": "run_started",
+          "raw": 108
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 67,
+          "direction": "in",
+          "gzip": 102,
+          "label": "POST /api/sessions",
+          "raw": 88
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 35,
+          "direction": "in",
+          "gzip": 83,
+          "label": "set_breakpoints",
+          "raw": 78
+        },
+        {
+          "channel": "ws",
+          "count": 1,
+          "deflate": 52,
+          "direction": "in",
+          "gzip": 66,
+          "label": "start",
+          "raw": 51
+        },
+        {
+          "channel": "http",
+          "count": 1,
+          "deflate": 40,
+          "direction": "in",
+          "gzip": 54,
+          "label": "POST /api/tokenize",
+          "raw": 34
+        }
+      ],
+      "totals": {
+        "http/in": {
+          "count": 3,
+          "deflate": 213,
+          "gzip": 279,
+          "raw": 293
+        },
+        "http/out": {
+          "count": 9,
+          "deflate": 3419,
+          "gzip": 4380,
+          "raw": 4963
+        },
+        "total": {
+          "count": 68,
+          "deflate": 28100,
+          "gzip": 41087,
+          "raw": 66911
+        },
+        "ws/in": {
+          "count": 11,
+          "deflate": 220,
+          "gzip": 796,
+          "raw": 654
+        },
+        "ws/out": {
+          "count": 45,
+          "deflate": 24248,
+          "gzip": 35632,
+          "raw": 61001
+        }
+      }
+    }
+  }
+}

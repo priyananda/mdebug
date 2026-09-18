@@ -21,9 +21,11 @@ from typing import Any
 from fastapi import FastAPI, Query, Response, WebSocket, WebSocketDisconnect
 from fastapi.responses import JSONResponse
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from pydantic import BaseModel, Field
 
 from .breakpoints import ConditionError
+from .metering import MeteringMiddleware, enabled_by_env, meter, set_enabled, wire_meter
 from .registry import SessionNotFound, registry
 from .runtime import get_runtime
 from .session import Session, SessionConfig
@@ -73,6 +75,26 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+# Order matters, and `add_middleware` makes the LAST call the outermost layer.
+# The stack ends up: wire meter -> gzip -> payload meter -> CORS -> routes.
+#
+# The two meters straddle compression on purpose: the inner one reports the
+# payload a change to `session.py` would shrink, the outer one reports what the
+# client actually downloads. Both are pass-throughs unless enabled.
+app.add_middleware(MeteringMiddleware, byte_meter=meter)
+
+# Responses are JSON, and mostly base64 of quantised tensors. Measured on the
+# at-cap benchmark profile this takes HTTP from ~178 kB to ~10 kB a session --
+# the largest single reduction available, for one line.
+#
+# The socket is deliberately not covered: uvicorn already negotiates
+# permessage-deflate with context takeover there, and GZipMiddleware ignores
+# non-HTTP scopes anyway.
+app.add_middleware(GZipMiddleware, minimum_size=500)
+
+app.add_middleware(MeteringMiddleware, byte_meter=wire_meter)
+set_enabled(enabled_by_env())
 
 
 def _not_found(session_id: str) -> JSONResponse:
